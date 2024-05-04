@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:omvoting/component/partes.dart';
 import 'package:omvoting/model/candList_app2_model.dart';
@@ -98,7 +99,8 @@ class _MyWidgetResState extends State<MyWidgetRes> {
                 ),
               ),
             ),
-            Expanded(
+            SizedBox(
+              height: 400,
               child: StreamBuilder<List<CandListApp2_Model>>(
                 stream: _candViewModel.allCandList.stream,
                 builder: (context, snapshot) {
@@ -143,7 +145,7 @@ class _MyWidgetResState extends State<MyWidgetRes> {
                       primaryXAxis: const CategoryAxis(
                         majorGridLines: MajorGridLines(width: 0),
                         plotOffset: 10,
-                        autoScrollingDelta: 10,
+                        autoScrollingDelta: 8,
                         borderColor: Color.fromARGB(31, 192, 17, 17),
                         labelStyle: TextStyle(fontFamily: 'georgia'),
                         autoScrollingMode: AutoScrollingMode.end,
