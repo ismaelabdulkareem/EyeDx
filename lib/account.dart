@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
-
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:omvoting/login_page.dart';
 
 class MyWidgetAcc extends StatefulWidget {
@@ -76,6 +76,7 @@ class _MyWidgetAccState extends State<MyWidgetAcc> {
                               Color.fromARGB(255, 240, 66, 66)),
                         ),
                         onPressed: () {
+                          FirebaseAuth.instance.signOut();
                           Navigator.push(
                             context,
                             MaterialPageRoute(

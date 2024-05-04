@@ -7,21 +7,20 @@ import 'package:omvoting/viewModel/candListApp2_viewModel.dart';
 import 'package:omvoting/viewModel/partilistApp2_viewModel.dart';
 import 'package:syncfusion_flutter_charts/charts.dart';
 
-class MyWidgetRes extends StatefulWidget {
-  const MyWidgetRes({super.key});
+class MyWidgetRes2 extends StatefulWidget {
+  const MyWidgetRes2({Key? key}) : super(key: key);
 
   @override
-  State<MyWidgetRes> createState() => _MyWidgetResState();
+  State<MyWidgetRes2> createState() => _MyWidgetResState();
 }
 
-class _MyWidgetResState extends State<MyWidgetRes> {
+class _MyWidgetResState extends State<MyWidgetRes2> {
   final CandView_Model _candViewModel = CandView_Model();
   final PartyViewModel _partyViewModel = PartyViewModel();
   @override
   void initState() {
     _candViewModel.onInit();
     _partyViewModel.onInit();
-    super.initState();
   }
 
   @override
@@ -35,14 +34,14 @@ class _MyWidgetResState extends State<MyWidgetRes> {
             fit: BoxFit.fill,
           ),
         ),
-        child: Column(
-          children: [
+        child: ListView(
+          children: <Widget>[
             Form(
               child: Container(
                 padding: const EdgeInsets.only(
                   left: 60,
                   right: 60,
-                  top: 50,
+                  top: 20,
                   bottom: 50,
                 ),
                 child: TextFormField(
@@ -98,77 +97,78 @@ class _MyWidgetResState extends State<MyWidgetRes> {
                 ),
               ),
             ),
-            Expanded(
-              child: StreamBuilder<List<CandListApp2_Model>>(
-                stream: _candViewModel.allCandList.stream,
-                builder: (context, snapshot) {
-                  if (_candViewModel.isLoading.value &&
-                      snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-                  if (snapshot.hasError) {
-                    return Text('Error: ${snapshot.error}');
-                  }
+            StreamBuilder<List<CandListApp2_Model>>(
+              stream: _candViewModel.allCandList.stream,
+              builder: (context, snapshot) {
+                if (_candViewModel.isLoading.value &&
+                    snapshot.connectionState == ConnectionState.waiting) {
+                  return const Center(child: CircularProgressIndicator());
+                }
+                if (snapshot.hasError) {
+                  return Text('Error: ${snapshot.error}');
+                }
 
-                  final List<ChartData> chartData =
-                      snapshot.data!.map((candidate) {
-                    return ChartData(candidate.candName, candidate.candVotes);
-                  }).toList();
-                  return Container(
-                    margin: const EdgeInsets.only(left: 22, right: 22),
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        colors: [
-                          Color.fromARGB(255, 228, 225, 225),
-                          Color.fromARGB(255, 255, 255, 255),
-                        ],
-                        begin: Alignment.center,
-                        end: Alignment.centerLeft,
-                      ),
-                      borderRadius: const BorderRadius.all(Radius.circular(20)),
-                      boxShadow: [
-                        BoxShadow(
-                          color: const Color.fromARGB(255, 77, 75, 75)
-                              .withOpacity(0.5),
-                          spreadRadius: 2,
-                          blurRadius: 7,
-                          offset: const Offset(0, 3),
-                        ),
+                final List<ChartData> chartData =
+                    snapshot.data!.map((candidate) {
+                  return ChartData(candidate.candName, candidate.candVotes);
+                }).toList();
+
+                return Container(
+                  height: 400,
+                  padding: const EdgeInsets.symmetric(horizontal: 10),
+                  margin: const EdgeInsets.only(left: 22, right: 22),
+                  decoration: BoxDecoration(
+                    gradient: const LinearGradient(
+                      colors: [
+                        Color.fromARGB(255, 228, 225, 225),
+                        Color.fromARGB(255, 255, 255, 255),
                       ],
+                      begin: Alignment.center,
+                      end: Alignment.centerLeft,
                     ),
-                    child: SfCartesianChart(
-                      zoomPanBehavior: ZoomPanBehavior(
-                        enablePanning: true,
+                    borderRadius: const BorderRadius.all(Radius.circular(20)),
+                    boxShadow: [
+                      BoxShadow(
+                        color: const Color.fromARGB(255, 77, 75, 75)
+                            .withOpacity(0.5),
+                        spreadRadius: 2,
+                        blurRadius: 7,
+                        offset: const Offset(0, 3),
                       ),
-                      primaryXAxis: const CategoryAxis(
-                        majorGridLines: MajorGridLines(width: 0),
-                        plotOffset: 10,
-                        autoScrollingDelta: 10,
-                        borderColor: Color.fromARGB(31, 192, 17, 17),
-                        labelStyle: TextStyle(fontFamily: 'georgia'),
-                        autoScrollingMode: AutoScrollingMode.end,
-                      ),
-                      series: <CartesianSeries>[
-                        BarSeries<ChartData, String>(
-                          dataSource: chartData,
-                          xValueMapper: (ChartData data, _) => data.a,
-                          yValueMapper: (ChartData data, _) => data.b,
-                          color: const Color.fromARGB(150, 220, 66, 66),
-                          dataLabelSettings: const DataLabelSettings(
-                            isVisible: true,
-                            textStyle: TextStyle(
-                              fontFamily: 'georgia',
-                              fontSize: 16,
-                              color: Color.fromARGB(255, 21, 1, 48),
-                            ),
+                    ],
+                  ),
+                  child: SfCartesianChart(
+                    zoomPanBehavior: ZoomPanBehavior(
+                      enablePanning: true,
+                    ),
+                    primaryXAxis: const CategoryAxis(
+                      majorGridLines: MajorGridLines(width: 0),
+                      plotOffset: 10,
+                      autoScrollingDelta: 10,
+                      borderColor: Color.fromARGB(31, 192, 17, 17),
+                      labelStyle: TextStyle(fontFamily: 'georgia'),
+                      autoScrollingMode: AutoScrollingMode.end,
+                    ),
+                    series: <CartesianSeries>[
+                      BarSeries<ChartData, String>(
+                        dataSource: chartData,
+                        xValueMapper: (ChartData data, _) => data.a,
+                        yValueMapper: (ChartData data, _) => data.b,
+                        color: const Color.fromARGB(150, 220, 66, 66),
+                        dataLabelSettings: const DataLabelSettings(
+                          isVisible: true,
+                          textStyle: TextStyle(
+                            fontFamily: 'georgia',
+                            fontSize: 16,
+                            color: Color.fromARGB(255, 21, 1, 48),
                           ),
-                          enableTooltip: true,
                         ),
-                      ],
-                    ),
-                  );
-                },
-              ),
+                        enableTooltip: true,
+                      ),
+                    ],
+                  ),
+                );
+              },
             ),
             Expanded(
               child: StreamBuilder<List<PartiesListApp2Model>>(

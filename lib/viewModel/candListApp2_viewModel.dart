@@ -18,7 +18,7 @@ class CandView_Model extends GetxController {
 
   void fetchAllCand() async {
     isLoading.value = true;
-    // allCandList.clear();
+    allCandList.clear();
     await FirebaseFirestore.instance
         .collection("candidate")
         .get()

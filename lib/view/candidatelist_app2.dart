@@ -1,5 +1,4 @@
 import 'dart:io';
-import 'package:flutter/widgets.dart';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
@@ -37,16 +36,16 @@ class _MyWidgetRegState extends State<MyWidgetInsertCandidates> {
 
   final candApp2VM = Get.put(CandView_Model());
 
-  @override
-  void dispose() {
-    cNameApp2.dispose();
-    cNoApp2.dispose();
-    cPartApp2.dispose();
-    cEduApp2.dispose();
-    cExpApp2.dispose();
-    cDiscApp2.dispose();
-    super.dispose();
-  }
+  // @override
+  // void dispose() {
+  //   cNameApp2.dispose();
+  //   cNoApp2.dispose();
+  //   cPartApp2.dispose();
+  //   cEduApp2.dispose();
+  //   cExpApp2.dispose();
+  //   cDiscApp2.dispose();
+  //   super.dispose();
+  // }
 
   Future<void> chooseProfilePic() async {
     final XFile? image = await imgPicker.pickImage(source: ImageSource.gallery);

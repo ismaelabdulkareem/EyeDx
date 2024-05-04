@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
-
 import 'package:intl_phone_field/intl_phone_field.dart';
-import 'package:omvoting/component/candidates.dart';
 import 'package:omvoting/component/textfiled.dart';
+import 'package:omvoting/firebase_auth/authServices.dart';
 
 class MyWidgetReg extends StatefulWidget {
   const MyWidgetReg({super.key});
@@ -12,18 +12,29 @@ class MyWidgetReg extends StatefulWidget {
   State<MyWidgetReg> createState() => _MyWidgetRegState();
 }
 
-String _user_name = 'a';
-String _password = "a";
-
-TextEditingController _user_controller = TextEditingController();
-TextEditingController _pass_controller = TextEditingController();
-
-GlobalKey<FormState> user_key = GlobalKey<FormState>();
-GlobalKey<FormState> pass_key = GlobalKey<FormState>();
-
 String selectedOption = "";
 
 class _MyWidgetRegState extends State<MyWidgetReg> {
+  final firebaseAuthServices _authe = firebaseAuthServices();
+
+  final _fullname = TextEditingController();
+  final _email = TextEditingController();
+  final _phone = TextEditingController();
+  final _pass = TextEditingController();
+  final _conifirm = TextEditingController();
+
+  final GlobalKey<FormState> _formKEY = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _fullname.dispose();
+    _email.dispose();
+    _phone.dispose();
+    _pass.dispose();
+    _conifirm.dispose();
+    super.dispose();
+  }
+
   int selectedOption = 1;
   @override
   Widget build(BuildContext context) {
@@ -87,16 +98,17 @@ class _MyWidgetRegState extends State<MyWidgetReg> {
                     height: 15,
                   ),
                   Form(
+                    key: _formKEY,
                     child: Column(
                       children: <Widget>[
                         myTextFiled(
                           myHit: 'Full name',
                           myObscureText: false,
-                          myController: _user_controller,
+                          myController: _fullname,
                           MyPrefIcon: const Icon(Icons.person_3),
                           myValidator: (value) {
                             if (value == '') {
-                              return "Incorrect Username";
+                              return "Write a username";
                             }
                             return null;
                           },
@@ -107,11 +119,16 @@ class _MyWidgetRegState extends State<MyWidgetReg> {
                         myTextFiled(
                           myHit: 'Email',
                           myObscureText: false,
-                          myController: _user_controller,
+                          myController: _email,
                           MyPrefIcon: const Icon(Icons.email_outlined),
                           myValidator: (value) {
                             if (value == '') {
-                              return "Incorrect Username";
+                              return "Type your Email";
+                            }
+                            if (!RegExp(
+                                    r'\b[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Z|a-z]{2,}\b')
+                                .hasMatch(value!)) {
+                              return 'Please enter a valid email (ex: omvoting@mail.com)';
                             }
                             return null;
                           },
@@ -120,6 +137,7 @@ class _MyWidgetRegState extends State<MyWidgetReg> {
                           height: 10,
                         ),
                         IntlPhoneField(
+                          controller: _phone,
                           decoration: const InputDecoration(
                             contentPadding: EdgeInsets.symmetric(vertical: 15),
                             labelText: 'Phone Number',
@@ -129,9 +147,6 @@ class _MyWidgetRegState extends State<MyWidgetReg> {
                             ),
                           ),
                           initialCountryCode: 'IQ',
-                          // inputFormatters: <TextInputFormatter>[
-                          //   FilteringTextInputFormatter.digitsOnly,
-                          // ],
                           keyboardType: TextInputType.number,
                           onChanged: (phone) {},
                         ),
@@ -219,11 +234,14 @@ class _MyWidgetRegState extends State<MyWidgetReg> {
                         myTextFiled(
                           myHit: 'Password',
                           myObscureText: true,
-                          myController: _user_controller,
+                          myController: _pass,
                           MyPrefIcon: const Icon(Icons.key_outlined),
                           myValidator: (value) {
                             if (value == '') {
-                              return "Incorrect Username";
+                              return "Type a password";
+                            }
+                            if (value!.length < 6) {
+                              return "Password should be at least 6 characters";
                             }
                             return null;
                           },
@@ -234,12 +252,18 @@ class _MyWidgetRegState extends State<MyWidgetReg> {
                         myTextFiled(
                           myHit: 'Conifirm Password',
                           myObscureText: true,
-                          myController: _user_controller,
+                          myController: _conifirm,
                           MyPrefIcon:
                               const Icon(Icons.confirmation_number_sharp),
                           myValidator: (value) {
                             if (value == '') {
-                              return "Incorrect Username";
+                              return "Do not Leave it empty";
+                            }
+                            if (value!.length < 6) {
+                              return "Password should be at least 6 characters";
+                            }
+                            if (_pass.text != value) {
+                              return "Password Does not match !";
                             }
                             return null;
                           },
@@ -266,6 +290,11 @@ class _MyWidgetRegState extends State<MyWidgetReg> {
                       backgroundColor: const Color.fromARGB(255, 240, 66, 66),
                       foregroundColor: Colors.white,
                     ),
+                    onPressed: () {
+                      if (_formKEY.currentState!.validate()) {
+                        sign_Up();
+                      }
+                    },
                     child: const Text(
                       "Register",
                       style: TextStyle(
@@ -275,7 +304,6 @@ class _MyWidgetRegState extends State<MyWidgetReg> {
                         fontWeight: FontWeight.w900,
                       ),
                     ),
-                    onPressed: () {},
                   ),
                   TextButton(
                     onPressed: () {
@@ -298,5 +326,50 @@ class _MyWidgetRegState extends State<MyWidgetReg> {
         ),
       ),
     );
+  }
+
+  // ignore: non_constant_identifier_names
+  void sign_Up() async {
+    String fullname = _fullname.text;
+    String email = _email.text;
+    String phoneno = _phone.text;
+    String pass = _pass.text;
+    String confirm = _conifirm.text;
+
+    try {
+      final user = await _authe.signUp(email, pass);
+      if (user != null) {
+        Fluttertoast.showToast(
+          msg: "User created successfully",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          timeInSecForIosWeb: 5,
+          backgroundColor:
+              const Color.fromARGB(255, 39, 250, 92).withOpacity(0.7),
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: "Failed to create user",
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.TOP,
+          timeInSecForIosWeb: 5,
+          backgroundColor: Colors.red.withOpacity(0.7),
+          textColor: Colors.white,
+          fontSize: 16.0,
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Failed to create user: $e",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP,
+        timeInSecForIosWeb: 5,
+        backgroundColor: Colors.red.withOpacity(0.7),
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
   }
 }

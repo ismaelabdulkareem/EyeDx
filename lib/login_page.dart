@@ -1,13 +1,16 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:fluttertoast/fluttertoast.dart';
+import 'package:get/get.dart';
 
 import 'package:omvoting/component/candidates.dart';
 import 'package:omvoting/component/textfiled.dart';
+import 'package:omvoting/firebase_auth/authServices.dart';
 import 'package:omvoting/index.dart';
 import 'package:omvoting/index_app2.dart';
 
-import 'package:omvoting/register_page.dart';
+import 'package:omvoting/firebase_auth/register_page.dart';
 
 class LoginScreenClass extends StatefulWidget {
   const LoginScreenClass({super.key});
@@ -16,18 +19,26 @@ class LoginScreenClass extends StatefulWidget {
   State<LoginScreenClass> createState() => _LoginScreenClassState();
 }
 
-String _user_name = 'w';
-String _password = "w";
-String msgAlert = '';
-
-TextEditingController _user_controller = TextEditingController();
-TextEditingController _pass_controller = TextEditingController();
-
-GlobalKey<FormState> user_key = GlobalKey<FormState>();
-GlobalKey<FormState> pass_key = GlobalKey<FormState>();
-GlobalKey<FormState> _formKey = GlobalKey<FormState>();
-
 class _LoginScreenClassState extends State<LoginScreenClass> {
+  final firebaseAuthServices _authe = firebaseAuthServices();
+  String _user_name = 'w';
+  String _password = "w";
+  String msgAlert = '';
+
+  final _user_controller = TextEditingController();
+  final _pass_controller = TextEditingController();
+
+  GlobalKey<FormState> user_key = GlobalKey<FormState>();
+  GlobalKey<FormState> pass_key = GlobalKey<FormState>();
+  GlobalKey<FormState> _formKey = GlobalKey<FormState>();
+
+  @override
+  void dispose() {
+    _user_controller.dispose();
+    _pass_controller.dispose();
+    super.dispose();
+  }
+
   // ignore: unused_field
   late Timer _timer;
 
@@ -106,24 +117,25 @@ class _LoginScreenClassState extends State<LoginScreenClass> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        String username = _user_controller.text;
-                        String password = _pass_controller.text;
+                      // if (_formKey.currentState!.validate()) {
+                      //sign_In();
 
-                        if (username == 'w' && password == 'w') {
-                          Navigator.pushReplacement(
-                            context,
-                            MaterialPageRoute(
-                              builder: (BuildContext context) =>
-                                  const MyWidgetIndex(),
-                            ),
-                          );
-                        } else {
-                          setState(() {
-                            _showMessage('Incorrect username or password');
-                          });
-                        }
-                      }
+                      // String username = _user_controller.text;
+                      // String password = _pass_controller.text;
+                      // if (username == 'w' && password == 'w') {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (BuildContext context) =>
+                              const MyWidgetIndex(),
+                        ),
+                      );
+                      // } else {
+                      //   setState(() {
+                      //     _showMessage('Incorrect username or password');
+                      //   });
+                      // }
+                      // }
                     },
                     child: const Text(
                       'Login',
@@ -212,5 +224,35 @@ class _LoginScreenClassState extends State<LoginScreenClass> {
         ],
       ),
     );
+  }
+
+  // ignore: non_constant_identifier_names
+  void sign_In() async {
+    String email = _user_controller.text;
+    String pass = _pass_controller.text;
+
+    try {
+      final user = await _authe.sighIn(email, pass);
+      if (user != null) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (BuildContext context) => const MyWidgetIndex(),
+          ),
+        );
+      } else {
+        _showMessage('Incorrect username or password');
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: "Failed to login user:\n $e",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.TOP,
+        timeInSecForIosWeb: 5,
+        backgroundColor: Colors.red.withOpacity(0.7),
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
   }
 }
