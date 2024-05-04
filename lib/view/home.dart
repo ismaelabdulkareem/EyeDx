@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/material.dart';
 import 'package:omvoting/component/candidates.dart';
 import 'package:omvoting/model/candList_app2_model.dart';
+import 'package:omvoting/view/CandidateDetailsScreen%20.dart';
 import 'package:omvoting/viewModel/candListApp2_viewModel.dart';
 
 class MyWidgetHome extends StatefulWidget {
@@ -83,12 +84,24 @@ class _MyWidgetHomeState extends State<MyWidgetHome> {
                     itemCount: candidates.length,
                     itemBuilder: (context, index) {
                       final candidate = candidates[index];
-                      return newCandidate(
-                        candidateName: candidate.candName,
-                        candidateParty: candidate.candPart,
-                        candidatenumber: candidate.candNo,
-                        candidateVote: candidate.candVotes.toString(),
-                        candidatePic: candidate.candImg,
+                      return GestureDetector(
+                        onTap: () {
+                          String documentId = candidate.candNo;
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) =>
+                                  MyWidgetCandDetail(documentId: documentId),
+                            ),
+                          );
+                        },
+                        child: newCandidate(
+                          candidateName: candidate.candName,
+                          candidateParty: candidate.candPart,
+                          candidatenumber: candidate.candNo,
+                          candidateVote: candidate.candVotes.toString(),
+                          candidatePic: candidate.candImg,
+                        ),
                       );
                     },
                   );

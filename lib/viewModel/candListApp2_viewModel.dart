@@ -33,13 +33,79 @@ class CandView_Model extends GetxController {
             candEdu: u['cEdu'],
             candExp: u['cExp'],
             candDisc: u['cDisc'],
-            candVotes: 100,
+            candVotes: u['cVotes'],
           ),
         );
       }
-
       isLoading.value = false;
     });
+  }
+
+  void fetchCandidateByNo(String cNo) async {
+    isLoading.value = true;
+    allCandList.clear();
+
+    await FirebaseFirestore.instance
+        .collection("candidate")
+        .where("cNo", isEqualTo: cNo)
+        .get()
+        .then((QuerySnapshot snapshot) {
+      for (var u in snapshot.docs) {
+        allCandList.add(
+          CandListApp2_Model(
+            candImg: u['cImg'],
+            candName: u['cName'],
+            candNo: u['cNo'],
+            candPart: u['cPart'],
+            candEdu: u['cEdu'],
+            candExp: u['cExp'],
+            candDisc: u['cDisc'],
+            candVotes: u['cVotes'],
+          ),
+        );
+      }
+      isLoading.value = false;
+    });
+  }
+
+  Future<void> fetchOneRow(String documentId) async {
+    if (documentId.isEmpty) {
+      throw ArgumentError('Document ID cannot be null or empty');
+    }
+
+    isLoading.value = true;
+    allCandList.clear();
+
+    try {
+      DocumentSnapshot snapshot = await FirebaseFirestore.instance
+          .collection("candidate")
+          .doc(documentId)
+          .get();
+
+      if (snapshot.exists) {
+        Map<String, dynamic> data = snapshot.data() as Map<String, dynamic>;
+        allCandList.add(
+          CandListApp2_Model(
+            candImg: data['cImg'] ?? '',
+            candName: data['cName'] ?? '',
+            candNo: data['cNo'] ?? '',
+            candPart: data['cPart'] ?? '',
+            candEdu: data['cEdu'] ?? '',
+            candExp: data['cExp'] ?? '',
+            candDisc: data['cDisc'] ?? '',
+            candVotes:
+                data['cVotes'] ?? 100, // default value if cVotes is missing
+          ),
+        );
+      } else {
+        print('Document with ID $documentId does not exist');
+      }
+    } catch (e) {
+      print('Error fetching document: $e');
+      // Handle error gracefully, e.g., show a message to the user
+    }
+
+    isLoading.value = false;
   }
 
   Future<void> addCandidate(File imagefileCand, String candName, String candNo,

@@ -5,7 +5,9 @@ import 'package:omvoting/news.dart';
 import 'package:omvoting/view/results.dart';
 
 class MyWidgetIndex extends StatefulWidget {
-  const MyWidgetIndex({super.key});
+  const MyWidgetIndex({
+    super.key,
+  });
 
   @override
   State<MyWidgetIndex> createState() => _MyWidgetHomeState();

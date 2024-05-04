@@ -43,15 +43,15 @@ class _MyWidgetHomeState extends State<MyWidgetIndex_app2> {
         ),
         //   elevation: 0,
         flexibleSpace: Container(
-          decoration: BoxDecoration(
+          decoration: const BoxDecoration(
               image: DecorationImage(
                   image: AssetImage('assets/images/BarApp2.png'),
                   fit: BoxFit.fill)),
         ),
         centerTitle: true,
         title: Container(
-          padding: EdgeInsets.only(bottom: 30),
-          child: Text(
+          padding: const EdgeInsets.only(bottom: 30),
+          child: const Text(
             'List',
             style: TextStyle(color: Colors.white),
           ),
