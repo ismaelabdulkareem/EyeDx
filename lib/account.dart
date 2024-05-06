@@ -16,26 +16,8 @@ class _MyWidgetAccState extends State<MyWidgetAcc> {
     return Scaffold(
       body: SingleChildScrollView(
         child: Container(
-          width: double.infinity,
-          decoration: const BoxDecoration(
-            image: DecorationImage(
-                image: ExactAssetImage('assets/images/bg_fliped.png'),
-                fit: BoxFit.fill),
-          ),
           child: Column(
             children: [
-              Container(
-                padding: const EdgeInsets.only(left: 60, right: 60, top: 60),
-                child: const Text(
-                  'Account',
-                  style: TextStyle(
-                    color: Color.fromARGB(255, 255, 255, 255),
-                    fontFamily: 'georgia',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 28,
-                  ),
-                ),
-              ),
               Container(
                 padding: const EdgeInsets.only(top: 45),
                 child: Row(

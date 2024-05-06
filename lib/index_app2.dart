@@ -45,7 +45,7 @@ class _MyWidgetHomeState extends State<MyWidgetIndex_app2> {
         flexibleSpace: Container(
           decoration: const BoxDecoration(
               image: DecorationImage(
-                  image: AssetImage('assets/images/BarApp2.png'),
+                  image: AssetImage('assets/images/BarApp.png'),
                   fit: BoxFit.fill)),
         ),
         centerTitle: true,
@@ -59,7 +59,7 @@ class _MyWidgetHomeState extends State<MyWidgetIndex_app2> {
 
         actions: [
           PopupMenuButton<String>(
-            padding: EdgeInsets.only(right: 30, bottom: 30),
+            padding: const EdgeInsets.only(right: 30, bottom: 30),
             iconColor: Colors.white,
             itemBuilder: (BuildContext context) {
               return <PopupMenuEntry<String>>[
@@ -68,7 +68,7 @@ class _MyWidgetHomeState extends State<MyWidgetIndex_app2> {
                     onPressed: () {
                       Navigator.pop(context);
                     },
-                    child: Text(
+                    child: const Text(
                       "Logout",
                       style: TextStyle(
                         fontSize: 20,
@@ -102,13 +102,13 @@ class _MyWidgetHomeState extends State<MyWidgetIndex_app2> {
               decoration: const BoxDecoration(
                 color: Color.fromARGB(255, 35, 132, 243),
               ),
-              accountName: Text(
+              accountName: const Text(
                 "Online Voting Application",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
               ),
-              accountEmail: Text(
+              accountEmail: const Text(
                 "Ismael Abdulkareem",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
@@ -140,13 +140,13 @@ class _MyWidgetHomeState extends State<MyWidgetIndex_app2> {
               ),
             ),
             ListTile(
-                leading: Icon(
+                leading: const Icon(
                   Icons.people_outline,
                 ),
                 title: const Text('List of parties'),
                 onTap: () {}),
             ListTile(
-              leading: Icon(
+              leading: const Icon(
                 Icons.people_outline_outlined,
               ),
               title: const Text('List of candidates'),
@@ -161,7 +161,7 @@ class _MyWidgetHomeState extends State<MyWidgetIndex_app2> {
               },
             ),
             ListTile(
-              leading: Icon(
+              leading: const Icon(
                 Icons.logout_outlined,
               ),
               title: const Text('Logout'),
@@ -169,7 +169,7 @@ class _MyWidgetHomeState extends State<MyWidgetIndex_app2> {
                 Navigator.pop(context);
               },
             ),
-            AboutListTile(
+            const AboutListTile(
               // <-- SEE HERE
               icon: Icon(
                 Icons.info,
@@ -200,7 +200,7 @@ class _MyWidgetHomeState extends State<MyWidgetIndex_app2> {
           child: BottomNavigationBar(
             currentIndex: _currentIndex,
             type: BottomNavigationBarType.fixed,
-            backgroundColor: Color.fromARGB(255, 7, 110, 206),
+            backgroundColor: const Color.fromARGB(255, 7, 110, 206),
             unselectedIconTheme:
                 const IconThemeData(color: Color.fromARGB(255, 113, 185, 243)),
             selectedIconTheme: const IconThemeData(

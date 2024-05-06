@@ -7,6 +7,9 @@ class newCandidate extends StatelessWidget {
   final String candidatenumber;
   final String candidateVote;
   final String candidatePic;
+  final String candidateEdu;
+  final String candidateExp;
+  final String candidateDisc;
 
   const newCandidate({
     super.key,
@@ -15,6 +18,9 @@ class newCandidate extends StatelessWidget {
     required this.candidatenumber,
     required this.candidateVote,
     required this.candidatePic,
+    required this.candidateEdu,
+    required this.candidateExp,
+    required this.candidateDisc,
   });
 
   @override

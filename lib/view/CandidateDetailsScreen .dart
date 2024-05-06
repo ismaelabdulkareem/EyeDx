@@ -50,7 +50,7 @@ class _MyWidgetCandDetailState extends State<MyWidgetCandDetail> {
         ),
         actions: [
           PopupMenuButton<String>(
-            padding: EdgeInsets.only(right: 30, bottom: 30),
+            padding: const EdgeInsets.only(right: 30, bottom: 30),
             iconColor: Colors.white,
             itemBuilder: (BuildContext context) {
               return <PopupMenuEntry<String>>[
@@ -116,6 +116,9 @@ class _MyWidgetCandDetailState extends State<MyWidgetCandDetail> {
                       candidatenumber: candidate.candNo,
                       candidateVote: candidate.candVotes.toString(),
                       candidatePic: candidate.candImg,
+                      candidateEdu: candidate.candEdu,
+                      candidateExp: candidate.candEdu,
+                      candidateDisc: candidate.candDisc,
                     );
                   },
                 );

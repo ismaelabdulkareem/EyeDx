@@ -1,3 +1,5 @@
+import 'dart:ffi';
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
@@ -30,44 +32,8 @@ class _MyWidgetResState extends State<MyWidgetRes> {
     return Scaffold(
       body: Container(
         width: double.infinity,
-        decoration: const BoxDecoration(
-          image: DecorationImage(
-            image: ExactAssetImage('assets/images/bg.png'),
-            fit: BoxFit.fill,
-          ),
-        ),
         child: Column(
           children: [
-            Form(
-              child: Container(
-                padding: const EdgeInsets.only(
-                  left: 60,
-                  right: 60,
-                  top: 50,
-                  bottom: 50,
-                ),
-                child: TextFormField(
-                  style: const TextStyle(
-                    fontFamily: 'georgia',
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                  decoration: const InputDecoration(
-                    filled: true,
-                    hintText: 'Search',
-                    contentPadding: EdgeInsets.symmetric(
-                      vertical: 3,
-                      horizontal: 4,
-                    ),
-                    fillColor: Color.fromARGB(255, 247, 227, 227),
-                    prefixIcon: Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.all(Radius.circular(30)),
-                    ),
-                  ),
-                ),
-              ),
-            ),
             Align(
               alignment: Alignment.center,
               child: Container(
@@ -171,6 +137,9 @@ class _MyWidgetResState extends State<MyWidgetRes> {
                   );
                 },
               ),
+            ),
+            const SizedBox(
+              height: 15,
             ),
             Expanded(
               child: StreamBuilder<List<PartiesListApp2Model>>(
