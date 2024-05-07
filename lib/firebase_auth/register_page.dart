@@ -330,11 +330,8 @@ class _MyWidgetRegState extends State<MyWidgetReg> {
 
   // ignore: non_constant_identifier_names
   void sign_Up() async {
-    String fullname = _fullname.text;
     String email = _email.text;
-    String phoneno = _phone.text;
     String pass = _pass.text;
-    String confirm = _conifirm.text;
 
     try {
       final user = await _authe.signUp(email, pass);

@@ -4,6 +4,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
+import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:omvoting/model/candList_app2_model.dart';
 
 class CandView_Model extends GetxController {
@@ -14,6 +15,7 @@ class CandView_Model extends GetxController {
   void onInit() {
     super.onInit();
     fetchAllCand();
+    // _incrementCandVote(int a,String b);
   }
 
   void fetchAllCand() async {
@@ -66,6 +68,35 @@ class CandView_Model extends GetxController {
       }
       isLoading.value = false;
     });
+  }
+
+  void incrementCandVote(int candidateVote, String candidatenumber) async {
+    isLoading.value = true;
+    int x = candidateVote + 1; // Increment candidateVote by 1
+
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection("candidate")
+          .where("cNo", isEqualTo: candidatenumber)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Get the reference to the first document (assuming there's only one)
+        DocumentReference documentReference =
+            querySnapshot.docs.first.reference;
+
+        // Update the "cVotes" field with the incremented value
+        await documentReference.update({"cVotes": x});
+
+        print("Document successfully updated");
+      } else {
+        print("No document found with cNo equal to '$candidatenumber'");
+      }
+    } catch (e) {
+      print("Error updating document: $e");
+    }
+
+    isLoading.value = false;
   }
 
   Future<void> fetchOneRow(String documentId) async {

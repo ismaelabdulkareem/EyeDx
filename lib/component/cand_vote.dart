@@ -1,18 +1,21 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
+import 'package:omvoting/viewModel/candListApp2_viewModel.dart';
 
 class CandidateDitailVote extends StatelessWidget {
   final String candidateName;
   final String candidateParty;
   final String candidatenumber;
-  final String candidateVote;
+  final int candidateVote;
   final String candidatePic;
   final String candidateEdu;
   final String candidateExp;
   final String candidateDisc;
+  final CandView_Model _viewModel3 = CandView_Model();
 
-  const CandidateDitailVote({
+  CandidateDitailVote({
     super.key,
     required this.candidateName,
     required this.candidateParty,
@@ -131,7 +134,7 @@ class CandidateDitailVote extends StatelessWidget {
                         child: Align(
                           alignment: Alignment.center,
                           child: Text(
-                            candidateVote,
+                            '$candidateVote',
                             style: const TextStyle(
                                 fontFamily: 'georgia',
                                 fontSize: 16,
@@ -247,7 +250,9 @@ class CandidateDitailVote extends StatelessWidget {
                 foregroundColor: Colors.white,
               ),
               child: const Text('Submit Vote'),
-              onPressed: () {},
+              onPressed: () {
+                _viewModel3.incrementCandVote(candidateVote, candidatenumber);
+              },
             ),
           ),
         ],

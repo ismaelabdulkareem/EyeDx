@@ -2,9 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-import 'package:get/get.dart';
 
-import 'package:omvoting/component/candidates.dart';
 import 'package:omvoting/component/textfiled.dart';
 import 'package:omvoting/firebase_auth/authServices.dart';
 import 'package:omvoting/index.dart';

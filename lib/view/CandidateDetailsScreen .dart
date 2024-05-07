@@ -1,7 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:omvoting/component/cand_vote.dart';
-import 'package:omvoting/component/candidates.dart';
 import 'package:omvoting/model/candList_app2_model.dart';
 import 'package:omvoting/viewModel/candListApp2_viewModel.dart';
 
@@ -114,7 +112,7 @@ class _MyWidgetCandDetailState extends State<MyWidgetCandDetail> {
                       candidateName: candidate.candName,
                       candidateParty: candidate.candPart,
                       candidatenumber: candidate.candNo,
-                      candidateVote: candidate.candVotes.toString(),
+                      candidateVote: candidate.candVotes,
                       candidatePic: candidate.candImg,
                       candidateEdu: candidate.candEdu,
                       candidateExp: candidate.candEdu,

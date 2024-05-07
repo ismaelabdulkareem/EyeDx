@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:omvoting/component/candidates.dart';
 import 'package:omvoting/component/newews.dart';
 
 class MyWidgetNews extends StatelessWidget {

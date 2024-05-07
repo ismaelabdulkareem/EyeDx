@@ -1,7 +1,5 @@
 import 'dart:ffi';
 
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:omvoting/component/partes.dart';
 import 'package:omvoting/model/candList_app2_model.dart';

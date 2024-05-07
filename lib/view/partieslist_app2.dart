@@ -3,7 +3,6 @@ import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:image_picker/image_picker.dart';
-import 'package:omvoting/component/candidates.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:omvoting/component/textfiled.dart';
 import 'package:omvoting/viewModel/partilistApp2_viewModel.dart';
