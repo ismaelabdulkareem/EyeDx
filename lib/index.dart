@@ -6,9 +6,13 @@ import 'package:omvoting/news.dart';
 import 'package:omvoting/view/results.dart';
 
 class MyWidgetIndex extends StatefulWidget {
-  const MyWidgetIndex({
+  int i = 0;
+  MyWidgetIndex(
+    int i, {
     super.key,
-  });
+  }) {
+    this.i = i;
+  }
 
   @override
   State<MyWidgetIndex> createState() => _MyWidgetHomeState();
@@ -16,6 +20,7 @@ class MyWidgetIndex extends StatefulWidget {
 
 class _MyWidgetHomeState extends State<MyWidgetIndex> {
   int _currentIndex = 0;
+
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
   List<Widget> wlist = const [
@@ -27,6 +32,8 @@ class _MyWidgetHomeState extends State<MyWidgetIndex> {
 
   @override
   Widget build(BuildContext context) {
+    _currentIndex = widget.i;
+    widget.i;
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 130,
@@ -232,6 +239,7 @@ class _MyWidgetHomeState extends State<MyWidgetIndex> {
             iconSize: 35,
             onTap: (index) {
               setState(() {
+                widget.i = index;
                 _currentIndex = index;
               });
             },

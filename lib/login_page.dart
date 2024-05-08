@@ -124,8 +124,7 @@ class _LoginScreenClassState extends State<LoginScreenClass> {
                       Navigator.pushReplacement(
                         context,
                         MaterialPageRoute(
-                          builder: (BuildContext context) =>
-                              const MyWidgetIndex(),
+                          builder: (BuildContext context) => MyWidgetIndex(0),
                         ),
                       );
                       // } else {
@@ -235,7 +234,7 @@ class _LoginScreenClassState extends State<LoginScreenClass> {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(
-            builder: (BuildContext context) => const MyWidgetIndex(),
+            builder: (BuildContext context) => MyWidgetIndex(0),
           ),
         );
       } else {

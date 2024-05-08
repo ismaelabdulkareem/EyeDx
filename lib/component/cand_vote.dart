@@ -1,10 +1,13 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
+import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
+import 'package:omvoting/view/votingDone.dart';
 import 'package:omvoting/viewModel/candListApp2_viewModel.dart';
 
-class CandidateDitailVote extends StatelessWidget {
+class CandidateDitailVote extends StatefulWidget {
   final String candidateName;
   final String candidateParty;
   final String candidatenumber;
@@ -13,9 +16,8 @@ class CandidateDitailVote extends StatelessWidget {
   final String candidateEdu;
   final String candidateExp;
   final String candidateDisc;
-  final CandView_Model _viewModel3 = CandView_Model();
 
-  CandidateDitailVote({
+  const CandidateDitailVote({
     super.key,
     required this.candidateName,
     required this.candidateParty,
@@ -26,6 +28,13 @@ class CandidateDitailVote extends StatelessWidget {
     required this.candidateExp,
     required this.candidateDisc,
   });
+
+  @override
+  State<CandidateDitailVote> createState() => _CandidateDitailVoteState();
+}
+
+class _CandidateDitailVoteState extends State<CandidateDitailVote> {
+  final CandView_Model _viewModel3 = CandView_Model();
 
   @override
   Widget build(BuildContext context) {
@@ -70,7 +79,7 @@ class CandidateDitailVote extends StatelessWidget {
                     ),
                     shape: BoxShape.circle,
                     image: DecorationImage(
-                      image: NetworkImage(candidatePic),
+                      image: NetworkImage(widget.candidatePic),
                       fit: BoxFit.cover, // Adjust this based on your preference
                     ),
                   ),
@@ -84,7 +93,7 @@ class CandidateDitailVote extends StatelessWidget {
                     children: <Widget>[
                       SizedBox(
                         child: Text(
-                          candidateName,
+                          widget.candidateName,
                           style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               fontFamily: 'georgia',
@@ -93,14 +102,14 @@ class CandidateDitailVote extends StatelessWidget {
                       ),
                       SizedBox(
                         child: Text(
-                          candidateParty,
+                          widget.candidateParty,
                           style: const TextStyle(
                               fontFamily: 'georgia', fontSize: 20),
                         ),
                       ),
                       SizedBox(
                         child: Text(
-                          'Candidate Number :  $candidatenumber ',
+                          'Candidate Number :  ${widget.candidatenumber} ',
                           style: const TextStyle(fontFamily: 'georgia'),
                         ),
                       ),
@@ -134,7 +143,7 @@ class CandidateDitailVote extends StatelessWidget {
                         child: Align(
                           alignment: Alignment.center,
                           child: Text(
-                            '$candidateVote',
+                            '${widget.candidateVote}',
                             style: const TextStyle(
                                 fontFamily: 'georgia',
                                 fontSize: 16,
@@ -172,7 +181,7 @@ class CandidateDitailVote extends StatelessWidget {
                               ),
                               SizedBox(
                                 child: Text(
-                                  candidateEdu,
+                                  widget.candidateEdu,
                                   style: const TextStyle(
                                     fontFamily: 'georgia',
                                   ),
@@ -201,7 +210,7 @@ class CandidateDitailVote extends StatelessWidget {
                               ),
                               SizedBox(
                                 child: Text(
-                                  candidateExp,
+                                  widget.candidateExp,
                                   style: const TextStyle(fontFamily: 'georgia'),
                                 ),
                               ),
@@ -228,7 +237,7 @@ class CandidateDitailVote extends StatelessWidget {
                               ),
                               SizedBox(
                                 child: Text(
-                                  candidateDisc,
+                                  widget.candidateDisc,
                                   style: const TextStyle(fontFamily: 'georgia'),
                                 ),
                               ),
@@ -251,7 +260,26 @@ class CandidateDitailVote extends StatelessWidget {
               ),
               child: const Text('Submit Vote'),
               onPressed: () {
-                _viewModel3.incrementCandVote(candidateVote, candidatenumber);
+                // _viewModel3.isLoading.value = true;
+                _viewModel3.incrementCandVote(
+                    widget.candidateVote, widget.candidatenumber);
+
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                      builder: (context) => CandidateVoteDone(
+                            candidateName: widget.candidateName,
+                            candidateParty: widget.candidateParty,
+                            candidatenumber: widget.candidatenumber,
+                            candidateVote: widget.candidateVote + 1,
+                            candidatePic: widget.candidatePic,
+                            candidateEdu: widget.candidateEdu,
+                            candidateExp: widget.candidateExp,
+                            candidateDisc: widget.candidateDisc,
+                          )),
+                );
+
+                setState(() {});
               },
             ),
           ),

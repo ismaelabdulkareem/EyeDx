@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:omvoting/component/candidates.dart';
 import 'package:omvoting/model/candList_app2_model.dart';
-import 'package:omvoting/view/CandidateDetailsScreen%20.dart';
+import 'package:omvoting/view/CandidateDetailsScreen.dart';
 import 'package:omvoting/viewModel/candListApp2_viewModel.dart';
 
 class MyWidgetHome extends StatefulWidget {

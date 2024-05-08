@@ -88,12 +88,24 @@ class CandView_Model extends GetxController {
         // Update the "cVotes" field with the incremented value
         await documentReference.update({"cVotes": x});
 
-        print("Document successfully updated");
+        Fluttertoast.showToast(
+          msg: 'Document successfully updated',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: const Color.fromARGB(255, 45, 189, 17),
+          textColor: const Color.fromARGB(255, 0, 0, 0),
+          fontSize: 16.0,
+        );
       } else {
-        print("No document found with cNo equal to '$candidatenumber'");
+        Fluttertoast.showToast(
+          msg: 'Document not successfully updated',
+        );
       }
     } catch (e) {
-      print("Error updating document: $e");
+      Fluttertoast.showToast(
+        msg: 'Error updating document : $e',
+      );
     }
 
     isLoading.value = false;
