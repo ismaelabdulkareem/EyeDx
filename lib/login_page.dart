@@ -6,7 +6,7 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:omvoting/component/textfiled.dart';
 import 'package:omvoting/firebase_auth/authServices.dart';
 import 'package:omvoting/index.dart';
-import 'package:omvoting/index_app2.dart';
+import 'package:omvoting/view/index_app2.dart';
 
 import 'package:omvoting/firebase_auth/register_page.dart';
 
@@ -210,7 +210,7 @@ class _LoginScreenClassState extends State<LoginScreenClass> {
               );
             },
             child: const Text(
-              "Admin Page",
+              "Admin Page!",
               style: TextStyle(
                 fontFamily: 'georgia',
                 color: Color.fromARGB(255, 64, 8, 128),

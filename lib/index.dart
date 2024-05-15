@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:omvoting/account.dart';
+import 'package:omvoting/view/CandidateDetailsScreen.dart';
 import 'package:omvoting/view/home.dart';
 import 'package:omvoting/news.dart';
 import 'package:omvoting/view/results.dart';
+import 'package:omvoting/view/votingDone.dart';
 
 class MyWidgetIndex extends StatefulWidget {
   int i = 0;
+  String swch = "default";
+
   MyWidgetIndex(
     int i, {
     super.key,
@@ -14,26 +18,88 @@ class MyWidgetIndex extends StatefulWidget {
     this.i = i;
   }
 
+  String docID = "";
+
+  MyWidgetIndex.cons2(
+    this.swch,
+    String docID, {
+    Key? key,
+  }) : super(key: key) {
+    this.swch = swch;
+    this.docID = docID;
+  }
+  String candidateName = "";
+  String candidateParty = "";
+  String candidatenumber = "";
+  int candidateVote = 0;
+  String candidatePic = "";
+  String candidateEdu = "";
+  String candidateExp = "";
+  String candidateDisc = "";
+
+  MyWidgetIndex.cons3(
+    this.swch,
+    String candidateName,
+    String candidateParty,
+    String candidatenumber,
+    int candidateVote,
+    String candidatePic,
+    String candidateEdu,
+    String candidateExp,
+    String candidateDisc, {
+    Key? key,
+  }) : super(key: key) {
+    this.swch = swch;
+    this.candidateName = candidateName;
+    this.candidateParty = candidateParty;
+    this.candidatenumber = candidatenumber;
+    this.candidateVote = candidateVote;
+    this.candidateEdu = candidateEdu;
+    this.candidateEdu = candidateEdu;
+    this.candidateExp = candidateExp;
+    this.candidateDisc = candidateDisc;
+  }
+
   @override
-  State<MyWidgetIndex> createState() => _MyWidgetHomeState();
+  State<MyWidgetIndex> createState() => _MyWidgetIndexState(documentId: docID);
 }
 
-class _MyWidgetHomeState extends State<MyWidgetIndex> {
+class _MyWidgetIndexState extends State<MyWidgetIndex> {
   int _currentIndex = 0;
+  String documentId;
+  _MyWidgetIndexState({required this.documentId});
 
   final scaffoldKey = GlobalKey<ScaffoldState>();
-
-  List<Widget> wlist = const [
-    MyWidgetHome(),
-    MyWidgetNews(),
-    MyWidgetRes(),
-    MyWidgetAcc(),
-  ];
+  List<Widget> wlist = [];
 
   @override
   Widget build(BuildContext context) {
     _currentIndex = widget.i;
+
     widget.i;
+
+    wlist = [
+      if (widget.swch == "toVote")
+        MyWidgetCandDetail(
+          documentId: documentId,
+        )
+      else if (widget.swch == "default")
+        const MyWidgetHome()
+      else if (widget.swch == "toDone")
+        CandidateVoteDone(
+          candidateName: widget.candidateName,
+          candidateParty: widget.candidateParty,
+          candidatenumber: widget.candidatenumber,
+          candidateVote: widget.candidateVote,
+          candidatePic: widget.candidatePic,
+          candidateEdu: widget.candidateEdu,
+          candidateExp: widget.candidateExp,
+          candidateDisc: widget.candidateDisc,
+        ),
+      const MyWidgetNews(),
+      const MyWidgetRes(),
+      const MyWidgetAcc(),
+    ];
     return Scaffold(
       appBar: AppBar(
         toolbarHeight: 130,

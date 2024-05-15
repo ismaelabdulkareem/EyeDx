@@ -1,25 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:omvoting/component/cand_del.dart';
 import 'package:omvoting/component/cand_vote.dart';
 import 'package:omvoting/model/candList_app2_model.dart';
 import 'package:omvoting/viewModel/candListApp2_viewModel.dart';
 
-class MyWidgetCandDetail extends StatefulWidget {
+class MyWidgetCandDetailApp2 extends StatefulWidget {
   final String documentId;
 
-  const MyWidgetCandDetail({
+  const MyWidgetCandDetailApp2({
     super.key,
     required this.documentId,
   });
 
   @override
-  _MyWidgetCandDetailState createState() =>
-      _MyWidgetCandDetailState(documentId: documentId);
+  _MyWidgetCandDetailApp2State createState() =>
+      _MyWidgetCandDetailApp2State(documentId: documentId);
 }
 
-class _MyWidgetCandDetailState extends State<MyWidgetCandDetail> {
+class _MyWidgetCandDetailApp2State extends State<MyWidgetCandDetailApp2> {
   final CandView_Model _viewModel1 = CandView_Model();
   final String documentId;
-  _MyWidgetCandDetailState({required this.documentId});
+  _MyWidgetCandDetailApp2State({required this.documentId});
 
   @override
   void initState() {
@@ -30,6 +31,10 @@ class _MyWidgetCandDetailState extends State<MyWidgetCandDetail> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Candidate List'),
+        backgroundColor: const Color.fromARGB(255, 191, 206, 245),
+      ),
       body: Column(
         children: [
           Expanded(
@@ -56,7 +61,7 @@ class _MyWidgetCandDetailState extends State<MyWidgetCandDetail> {
                   itemBuilder: (context, index) {
                     final candidate = candidates[index];
 
-                    return CandidateDitailVote(
+                    return CandidateDitailDel(
                       candidateName: candidate.candName,
                       candidateParty: candidate.candPart,
                       candidatenumber: candidate.candNo,

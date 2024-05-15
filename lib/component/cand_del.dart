@@ -5,10 +5,11 @@ import 'package:flutter/widgets.dart';
 import 'package:get/get_rx/src/rx_types/rx_types.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:omvoting/index.dart';
+import 'package:omvoting/view/DelDone.dart';
 import 'package:omvoting/view/votingDone.dart';
 import 'package:omvoting/viewModel/candListApp2_viewModel.dart';
 
-class CandidateDitailVote extends StatefulWidget {
+class CandidateDitailDel extends StatefulWidget {
   final String candidateName;
   final String candidateParty;
   final String candidatenumber;
@@ -18,7 +19,7 @@ class CandidateDitailVote extends StatefulWidget {
   final String candidateExp;
   final String candidateDisc;
 
-  const CandidateDitailVote({
+  const CandidateDitailDel({
     super.key,
     required this.candidateName,
     required this.candidateParty,
@@ -31,10 +32,10 @@ class CandidateDitailVote extends StatefulWidget {
   });
 
   @override
-  State<CandidateDitailVote> createState() => _CandidateDitailVoteState();
+  State<CandidateDitailDel> createState() => _CandidateDitailDelState();
 }
 
-class _CandidateDitailVoteState extends State<CandidateDitailVote> {
+class _CandidateDitailDelState extends State<CandidateDitailDel> {
   final CandView_Model _viewModel3 = CandView_Model();
 
   @override
@@ -47,23 +48,11 @@ class _CandidateDitailVoteState extends State<CandidateDitailVote> {
             margin:
                 const EdgeInsets.only(top: 15, bottom: 25, right: 20, left: 20),
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [
-                  Color.fromARGB(255, 228, 225, 225),
-                  Color.fromARGB(255, 255, 255, 255),
-                ],
-                begin: Alignment.centerLeft,
-                end: Alignment.centerRight,
-              ),
               borderRadius: const BorderRadius.all(Radius.circular(10)),
-              boxShadow: [
-                BoxShadow(
-                  color: const Color.fromARGB(255, 77, 75, 75).withOpacity(0.5),
-                  spreadRadius: 0.5,
-                  blurRadius: 5,
-                  offset: const Offset(0, 1),
-                ),
-              ],
+              border: Border.all(
+                color: const Color.fromARGB(255, 107, 105, 105),
+                width: 1.0,
+              ),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -73,12 +62,11 @@ class _CandidateDitailVoteState extends State<CandidateDitailVote> {
                   width: 150,
                   decoration: BoxDecoration(
                     border: Border.all(
-                      color: const Color.fromARGB(
-                          255, 224, 99, 99), // Border color
+                      color: Color.fromARGB(255, 11, 53, 194), // Border color
                       width: 3.0,
                       // Border width
                     ),
-                    shape: BoxShape.circle,
+                    shape: BoxShape.rectangle,
                     image: DecorationImage(
                       image: NetworkImage(widget.candidatePic),
                       fit: BoxFit.cover, // Adjust this based on your preference
@@ -131,7 +119,7 @@ class _CandidateDitailVoteState extends State<CandidateDitailVote> {
                           border: GradientBoxBorder(
                             gradient: LinearGradient(
                               colors: [
-                                Color.fromARGB(255, 255, 0, 0),
+                                Color.fromARGB(255, 77, 16, 243),
                                 Color.fromRGBO(243, 228, 14, 0.004)
                               ],
                               begin: Alignment.topCenter,
@@ -139,7 +127,7 @@ class _CandidateDitailVoteState extends State<CandidateDitailVote> {
                             ),
                             width: 3,
                           ),
-                          shape: BoxShape.rectangle,
+                          shape: BoxShape.circle,
                         ),
                         child: Align(
                           alignment: Alignment.center,
@@ -159,93 +147,6 @@ class _CandidateDitailVoteState extends State<CandidateDitailVote> {
                       const SizedBox(
                         height: 20,
                       ),
-                      Column(
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const SizedBox(
-                                child: Text(
-                                  'Certification',
-                                  style: TextStyle(
-                                      fontFamily: 'georgia',
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              const SizedBox(
-                                child: Text(
-                                  ' | ',
-                                  style: TextStyle(
-                                      fontFamily: 'georgia',
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              SizedBox(
-                                child: Text(
-                                  widget.candidateEdu,
-                                  style: const TextStyle(
-                                    fontFamily: 'georgia',
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const SizedBox(
-                                child: Text(
-                                  'Expereince',
-                                  style: TextStyle(
-                                      fontFamily: 'georgia',
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              const SizedBox(
-                                child: Text(
-                                  ' | ',
-                                  style: TextStyle(
-                                      fontFamily: 'georgia',
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              SizedBox(
-                                child: Text(
-                                  widget.candidateExp,
-                                  style: const TextStyle(fontFamily: 'georgia'),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              const SizedBox(
-                                child: Text(
-                                  'Plan',
-                                  style: TextStyle(
-                                      fontFamily: 'georgia',
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              const SizedBox(
-                                child: Text(
-                                  ' | ',
-                                  style: TextStyle(
-                                      fontFamily: 'georgia',
-                                      fontWeight: FontWeight.bold),
-                                ),
-                              ),
-                              SizedBox(
-                                child: Text(
-                                  widget.candidateDisc,
-                                  style: const TextStyle(fontFamily: 'georgia'),
-                                ),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
                     ],
                   ),
                 ),
@@ -259,25 +160,17 @@ class _CandidateDitailVoteState extends State<CandidateDitailVote> {
                 backgroundColor: const Color.fromARGB(255, 240, 66, 66),
                 foregroundColor: Colors.white,
               ),
-              child: const Text('Submit Vote'),
+              child: const Text('Delete Candidate'),
               onPressed: () {
                 // _viewModel3.isLoading.value = true;
-                _viewModel3.incrementCandVote(
-                    widget.candidateVote, widget.candidatenumber);
+                _viewModel3.deletecandidate(widget.candidatenumber);
 
                 Navigator.pushReplacement(
                   context,
                   MaterialPageRoute(
-                      builder: (context) => MyWidgetIndex.cons3(
-                            "toDone",
-                            widget.candidateName,
-                            widget.candidateParty,
-                            widget.candidatenumber,
-                            (widget.candidateVote + 1),
-                            widget.candidatePic,
-                            widget.candidateEdu,
-                            widget.candidateExp,
-                            widget.candidateDisc,
+                      builder: (context) => CandidateDelDone(
+                            candidateName: widget.candidateName,
+                            candidatePic: widget.candidatePic,
                           )),
                 );
 // CandidateVoteDone(

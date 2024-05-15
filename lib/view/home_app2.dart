@@ -1,18 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:omvoting/component/candidates.dart';
+import 'package:omvoting/component/candidates_app2.dart';
 import 'package:omvoting/index.dart';
 import 'package:omvoting/model/candList_app2_model.dart';
 import 'package:omvoting/view/CandidateDetailsScreen.dart';
+import 'package:omvoting/view/CandidateDetailsScreen_app2.dart';
 import 'package:omvoting/viewModel/candListApp2_viewModel.dart';
 
-class MyWidgetHome extends StatefulWidget {
-  const MyWidgetHome({super.key});
+class MyWidgetHomeApp2 extends StatefulWidget {
+  const MyWidgetHomeApp2({super.key});
 
   @override
-  _MyWidgetHomeState createState() => _MyWidgetHomeState();
+  _MyWidgetHomeApp2State createState() => _MyWidgetHomeApp2State();
 }
 
-class _MyWidgetHomeState extends State<MyWidgetHome> {
+class _MyWidgetHomeApp2State extends State<MyWidgetHomeApp2> {
   final CandView_Model _viewModel = CandView_Model();
 
   @override
@@ -24,6 +26,10 @@ class _MyWidgetHomeState extends State<MyWidgetHome> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Candidate List'),
+        backgroundColor: const Color.fromARGB(255, 191, 206, 245),
+      ),
       body: Container(
         width: double.infinity,
         child: Column(
@@ -57,24 +63,20 @@ class _MyWidgetHomeState extends State<MyWidgetHome> {
                       return GestureDetector(
                         onTap: () {
                           String docId = candidate.candNo;
-                          Navigator.push(
+                          Navigator.pushReplacement(
                             context,
                             MaterialPageRoute(
-                              builder: (context) => MyWidgetIndex.cons2(
-                                  "toVote", docId.toString()),
+                              builder: (context) => MyWidgetCandDetailApp2(
+                                documentId: docId,
+                              ),
                               //MyWidgetCandDetail(documentId: docId),
                             ),
                           );
                         },
-                        child: newCandidate(
+                        child: newCandidateApp2(
                           candidateName: candidate.candName,
                           candidateParty: candidate.candPart,
                           candidatenumber: candidate.candNo,
-                          candidateVote: candidate.candVotes.toString(),
-                          candidatePic: candidate.candImg,
-                          candidateEdu: candidate.candEdu,
-                          candidateExp: candidate.candEdu,
-                          candidateDisc: candidate.candDisc,
                         ),
                       );
                     },

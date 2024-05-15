@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
-
+import 'package:omvoting/login_page.dart';
 import 'package:omvoting/view/partieslist_app2.dart';
 import 'package:omvoting/view/candidatelist_app2.dart';
 //import 'package:votingapp/component/myDrawer.dart';
@@ -9,10 +9,10 @@ class MyWidgetIndex_app2 extends StatefulWidget {
   const MyWidgetIndex_app2({super.key});
 
   @override
-  State<MyWidgetIndex_app2> createState() => _MyWidgetHomeState();
+  State<MyWidgetIndex_app2> createState() => _MyWidgetIndex_app2State();
 }
 
-class _MyWidgetHomeState extends State<MyWidgetIndex_app2> {
+class _MyWidgetIndex_app2State extends State<MyWidgetIndex_app2> {
   int _currentIndex = 0;
   final scaffoldKey = GlobalKey<ScaffoldState>();
 
@@ -166,7 +166,12 @@ class _MyWidgetHomeState extends State<MyWidgetIndex_app2> {
               ),
               title: const Text('Logout'),
               onTap: () {
-                Navigator.pop(context);
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => const LoginScreenClass(),
+                  ),
+                );
               },
             ),
             const AboutListTile(
@@ -207,9 +212,9 @@ class _MyWidgetHomeState extends State<MyWidgetIndex_app2> {
                 color: Color.fromARGB(255, 255, 255, 255), size: 35),
             iconSize: 35,
             selectedItemColor: const Color.fromARGB(255, 255, 255, 255),
-            unselectedItemColor: Color.fromARGB(255, 223, 219, 219),
-            selectedLabelStyle: TextStyle(fontFamily: 'georgia'),
-            unselectedLabelStyle: TextStyle(fontFamily: 'georgia'),
+            unselectedItemColor: const Color.fromARGB(255, 223, 219, 219),
+            selectedLabelStyle: const TextStyle(fontFamily: 'georgia'),
+            unselectedLabelStyle: const TextStyle(fontFamily: 'georgia'),
             onTap: (index) {
               setState(() {
                 _currentIndex = index;

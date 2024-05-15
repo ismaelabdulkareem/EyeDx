@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:omvoting/component/textfiled.dart';
+import 'package:omvoting/view/home_app2.dart';
 import 'package:omvoting/viewModel/candListApp2_viewModel.dart';
 import 'package:text_area/text_area.dart';
 import 'package:fluttertoast/fluttertoast.dart';
@@ -35,17 +36,17 @@ class _MyWidgetRegState extends State<MyWidgetInsertCandidates> {
   File? imgFile;
 
   final candApp2VM = Get.put(CandView_Model());
-
-  // @override
-  // void dispose() {
-  //   cNameApp2.dispose();
-  //   cNoApp2.dispose();
-  //   cPartApp2.dispose();
-  //   cEduApp2.dispose();
-  //   cExpApp2.dispose();
-  //   cDiscApp2.dispose();
-  //   super.dispose();
-  // }
+/*
+  @override
+  void dispose() {
+    cNameApp2.dispose();
+    cNoApp2.dispose();
+    cPartApp2.dispose();
+    cEduApp2.dispose();
+    cExpApp2.dispose();
+    cDiscApp2.dispose();
+    super.dispose();
+  }*/
 
   Future<void> chooseProfilePic() async {
     final XFile? image = await imgPicker.pickImage(source: ImageSource.gallery);
@@ -324,19 +325,29 @@ class _MyWidgetRegState extends State<MyWidgetInsertCandidates> {
                           }
                         },
                         child: Container(
-                          padding: const EdgeInsets.symmetric(
-                              vertical: 5, horizontal: 10),
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 40),
                           alignment: Alignment.center,
                           height: 55,
                           decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color.fromARGB(255, 226, 225, 228),
+                                Color.fromARGB(255, 255, 255, 255),
+                              ],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
                             borderRadius: BorderRadius.circular(30),
                             border:
                                 Border.all(color: Colors.black), // Black border
                             boxShadow: [
                               BoxShadow(
-                                color: const Color.fromARGB(255, 91, 138, 240)
-                                    .withOpacity(
-                                        1), // Black color with opacity for blur effect
+                                color: const Color.fromARGB(255, 77, 75, 75)
+                                    .withOpacity(0.5),
+                                spreadRadius: 0.5,
+                                blurRadius: 5,
+                                offset: const Offset(0, 1),
                               ),
                             ],
                           ),
@@ -345,7 +356,56 @@ class _MyWidgetRegState extends State<MyWidgetInsertCandidates> {
                             style: TextStyle(
                               fontSize: 18,
                               fontFamily: 'georgia',
-                              color: Color.fromARGB(255, 255, 255, 255),
+                              color: Color.fromARGB(255, 0, 0, 0),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                    Container(
+                      child: InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (BuildContext context) =>
+                                  const MyWidgetHomeApp2(),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          margin: const EdgeInsets.symmetric(
+                              vertical: 10, horizontal: 40),
+                          alignment: Alignment.center,
+                          height: 55,
+                          decoration: BoxDecoration(
+                            gradient: const LinearGradient(
+                              colors: [
+                                Color.fromARGB(255, 35, 90, 241),
+                                Color.fromARGB(255, 255, 255, 255),
+                              ],
+                              begin: Alignment.centerLeft,
+                              end: Alignment.centerRight,
+                            ),
+                            borderRadius: BorderRadius.circular(30),
+                            border:
+                                Border.all(color: Colors.black), // Black border
+                            boxShadow: [
+                              BoxShadow(
+                                color: const Color.fromARGB(255, 77, 75, 75)
+                                    .withOpacity(0.5),
+                                spreadRadius: 0.5,
+                                blurRadius: 5,
+                                offset: const Offset(0, 1),
+                              ),
+                            ],
+                          ),
+                          child: const Text(
+                            "Candidate List",
+                            style: TextStyle(
+                              fontSize: 18,
+                              fontFamily: 'georgia',
+                              color: Color.fromARGB(255, 0, 0, 0),
                             ),
                           ),
                         ),

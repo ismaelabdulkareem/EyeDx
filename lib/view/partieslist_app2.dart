@@ -1,4 +1,5 @@
 import 'dart:io';
+import 'dart:math';
 import 'package:get/get.dart';
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
@@ -7,16 +8,20 @@ import 'package:fluttertoast/fluttertoast.dart';
 import 'package:omvoting/component/textfiled.dart';
 import 'package:omvoting/viewModel/partilistApp2_viewModel.dart';
 import 'package:loading_overlay/loading_overlay.dart';
+import 'package:flutter_colorpicker/flutter_colorpicker.dart';
 
 class MyWidgetInsertParties extends StatefulWidget {
   const MyWidgetInsertParties({super.key});
 
   @override
-  State<MyWidgetInsertParties> createState() => _MyWidgetRegState();
+  State<MyWidgetInsertParties> createState() => _MyWidgetInsertPartiesState();
 }
 
-class _MyWidgetRegState extends State<MyWidgetInsertParties> {
+class _MyWidgetInsertPartiesState extends State<MyWidgetInsertParties> {
   final ImagePicker imgPicker = ImagePicker();
+  Color selectedColor =
+      const Color.fromARGB(255, 228, 11, 192); // Initial color
+
   File? imgFile;
 
   final TextEditingController _namePartyApp2 = TextEditingController();
@@ -135,6 +140,9 @@ class _MyWidgetRegState extends State<MyWidgetInsertParties> {
             },
           ),
           const SizedBox(height: 10),
+
+          _buildColorPickerButton(), // Add color picker button/icon
+          const SizedBox(height: 20),
         ],
       ),
     );
@@ -143,11 +151,14 @@ class _MyWidgetRegState extends State<MyWidgetInsertParties> {
   Widget _buildInsertButton() {
     return InkWell(
       onTap: () {
+        Random random = Random();
+        int partyVotes = random.nextInt(1000000) + 1;
+
         if (_namePartyApp2.text.isNotEmpty &&
             _NoPartyApp2.text.isNotEmpty &&
             imgFile != null) {
-          partyApp2VM.addParty(
-              imgFile!, _namePartyApp2.text, _NoPartyApp2.text);
+          partyApp2VM.addParty(imgFile!, _namePartyApp2.text, _NoPartyApp2.text,
+              partyVotes, selectedColor);
         } else {
           Fluttertoast.showToast(
             msg: "Failled to add data !, Please fill up all fields",
@@ -163,16 +174,26 @@ class _MyWidgetRegState extends State<MyWidgetInsertParties> {
         }
       },
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 5, horizontal: 10),
+        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
         alignment: Alignment.center,
         height: 55,
         decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color.fromARGB(255, 226, 225, 228),
+              Color.fromARGB(255, 255, 255, 255),
+            ],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
           borderRadius: BorderRadius.circular(30),
           border: Border.all(color: Colors.black), // Black border
           boxShadow: [
             BoxShadow(
-              color: const Color.fromARGB(255, 91, 138, 240)
-                  .withOpacity(1), // Black color with opacity for blur effect
+              color: const Color.fromARGB(255, 77, 75, 75).withOpacity(0.5),
+              spreadRadius: 0.5,
+              blurRadius: 5,
+              offset: const Offset(0, 1),
             ),
           ],
         ),
@@ -181,7 +202,59 @@ class _MyWidgetRegState extends State<MyWidgetInsertParties> {
           style: TextStyle(
             fontSize: 18,
             fontFamily: 'georgia',
-            color: Color.fromARGB(255, 255, 255, 255),
+            color: Color.fromARGB(255, 0, 0, 0),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildColorPickerButton() {
+    return GestureDetector(
+      onTap: () {
+        showDialog(
+          context: context,
+          builder: (BuildContext context) {
+            return AlertDialog(
+              title: const Text('Pick a color'),
+              content: SingleChildScrollView(
+                child: ColorPicker(
+                  pickerColor: selectedColor,
+                  onColorChanged: (color) {
+                    setState(() {
+                      selectedColor = color;
+                    });
+                  },
+                  pickerAreaHeightPercent: 0.8,
+                ),
+              ),
+              actions: <Widget>[
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
+                  },
+                  child: const Text('Pick'),
+                ),
+              ],
+            );
+          },
+        );
+      },
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 15),
+        decoration: BoxDecoration(
+          color: selectedColor,
+          borderRadius: BorderRadius.circular(25),
+          border: Border.all(color: Colors.black),
+        ),
+        child: const Center(
+          child: Text(
+            'Pick a party color',
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
           ),
         ),
       ),

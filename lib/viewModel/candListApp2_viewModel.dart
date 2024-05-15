@@ -4,7 +4,6 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
 import 'package:get/get.dart';
-import 'package:get/get_connect/http/src/utils/utils.dart';
 import 'package:omvoting/model/candList_app2_model.dart';
 
 class CandView_Model extends GetxController {
@@ -68,6 +67,46 @@ class CandView_Model extends GetxController {
       }
       isLoading.value = false;
     });
+  }
+
+  void deletecandidate(String candidatenumber) async {
+    isLoading.value = true;
+
+    try {
+      QuerySnapshot querySnapshot = await FirebaseFirestore.instance
+          .collection("candidate")
+          .where("cNo", isEqualTo: candidatenumber)
+          .get();
+
+      if (querySnapshot.docs.isNotEmpty) {
+        // Get the reference to the first document (assuming there's only one)
+        DocumentReference documentReference =
+            querySnapshot.docs.first.reference;
+
+        // Update the "cVotes" field with the incremented value
+        await documentReference.delete();
+
+        Fluttertoast.showToast(
+          msg: 'Candidate Deleted successfully',
+          toastLength: Toast.LENGTH_SHORT,
+          gravity: ToastGravity.BOTTOM,
+          timeInSecForIosWeb: 1,
+          backgroundColor: const Color.fromARGB(255, 45, 189, 17),
+          textColor: const Color.fromARGB(255, 0, 0, 0),
+          fontSize: 16.0,
+        );
+      } else {
+        Fluttertoast.showToast(
+          msg: 'Candidate not successfully deleted',
+        );
+      }
+    } catch (e) {
+      Fluttertoast.showToast(
+        msg: 'Error Deleting document : $e',
+      );
+    }
+
+    isLoading.value = false;
   }
 
   void incrementCandVote(int candidateVote, String candidatenumber) async {
@@ -195,12 +234,18 @@ class CandView_Model extends GetxController {
       );
     } catch (error) {
       isLoading.value = false;
-      String errorMessage = 'Failed to add Candidate';
-      if (error is FirebaseException) {
-        errorMessage = error.message ?? 'Unknown error occurred';
-      }
-      Get.snackbar('Adding candidate', errorMessage,
-          backgroundColor: Colors.red, snackPosition: SnackPosition.BOTTOM);
+
+      Fluttertoast.showToast(
+        msg: "Failed to add Candidate : $error",
+        toastLength:
+            Toast.LENGTH_SHORT, // Duration for which the toast is shown
+        gravity: ToastGravity.TOP, // Toast position
+        timeInSecForIosWeb: 5, // Time in seconds for iOS
+        backgroundColor: const Color.fromARGB(255, 39, 250, 92)
+            .withOpacity(0.7), // Background color of the toast
+        textColor: Colors.white, // Text color of the toast
+        fontSize: 16.0, // Font size of the toast message
+      );
     }
   }
 }

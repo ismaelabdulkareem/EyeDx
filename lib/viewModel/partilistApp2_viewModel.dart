@@ -31,6 +31,7 @@ class PartyViewModel extends GetxController {
             partyId: u['pId'],
             image: u['pImage'],
             partyVotes: u['pVotes'],
+            partyColor: u['pColor'],
           ),
         );
       }
@@ -39,7 +40,8 @@ class PartyViewModel extends GetxController {
     });
   }
 
-  Future<void> addParty(File imageFile, String partName, String partNo) async {
+  Future<void> addParty(File imageFile, String partName, String partNo,
+      int partyVotes, Color partyColor) async {
     try {
       isLoading.value = true;
 
@@ -50,12 +52,16 @@ class PartyViewModel extends GetxController {
           .putFile(imageFile);
 
       String downloadImageUrl = await uploadTask.ref.getDownloadURL();
+      // Convert partyColor to hexadecimal string
+      String colorHexString =
+          partyColor.value.toRadixString(16).padLeft(8, '0');
 
       PartiesListApp2Model party = PartiesListApp2Model(
         partyName: partName,
         partyId: partNo,
         image: downloadImageUrl,
-        partyVotes: 100,
+        partyVotes: partyVotes,
+        partyColor: colorHexString,
       );
 
       await FirebaseFirestore.instance

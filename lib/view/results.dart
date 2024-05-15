@@ -1,4 +1,5 @@
 import 'dart:ffi';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'package:omvoting/component/partes.dart';
@@ -162,11 +163,16 @@ class _MyWidgetResState extends State<MyWidgetRes> {
                     itemCount: parties.length,
                     itemBuilder: (context, index) {
                       final cn = parties[index];
+                      Random random = Random();
+                      int partiPerc = random.nextInt(100) + 1;
+                      // Convert hexadecimal color string to Color
+                      Color partyColor =
+                          Color(int.parse(cn.partyColor, radix: 16));
                       return MyWidgetParties(
                         partiName: cn.partyName,
                         partiVotes: cn.partyVotes.toString(),
-                        partiPercent: '61%',
-                        colorChoose: Colors.yellow,
+                        partiPercent: '$partiPerc%',
+                        colorChoose: partyColor,
                         img: cn.image,
                       );
                     },

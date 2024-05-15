@@ -2,40 +2,33 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:omvoting/index.dart';
+import 'package:omvoting/view/home_app2.dart';
+import 'package:omvoting/view/index_app2.dart';
 import 'package:omvoting/viewModel/candListApp2_viewModel.dart';
 
-class CandidateVoteDone extends StatefulWidget {
+class CandidateDelDone extends StatefulWidget {
   final String candidateName;
-  final String candidateParty;
-  final String candidatenumber;
-  final int candidateVote;
   final String candidatePic;
-  final String candidateEdu;
-  final String candidateExp;
-  final String candidateDisc;
-
-  const CandidateVoteDone({
+  const CandidateDelDone({
     super.key,
     required this.candidateName,
-    required this.candidateParty,
-    required this.candidatenumber,
-    required this.candidateVote,
     required this.candidatePic,
-    required this.candidateEdu,
-    required this.candidateExp,
-    required this.candidateDisc,
   });
 
   @override
-  State<CandidateVoteDone> createState() => _CandidateVoteDoneState();
+  State<CandidateDelDone> createState() => _CandidateDelDoneState();
 }
 
-class _CandidateVoteDoneState extends State<CandidateVoteDone> {
+class _CandidateDelDoneState extends State<CandidateDelDone> {
   final CandView_Model _viewModel3 = CandView_Model();
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: AppBar(
+        title: const Text('Candidate Deletion'),
+        backgroundColor: const Color.fromARGB(255, 191, 206, 245),
+      ),
       body: Container(
         child: Column(
           children: [
@@ -75,7 +68,7 @@ class _CandidateVoteDoneState extends State<CandidateVoteDone> {
                       children: <Widget>[
                         SizedBox(
                           child: Text(
-                            'Voting to  ${widget.candidateName} successfully submitted',
+                            'Deleting ${widget.candidateName} successfully submitted',
                             style: const TextStyle(
                                 fontFamily: 'georgia',
                                 fontSize: 14,
@@ -101,48 +94,6 @@ class _CandidateVoteDoneState extends State<CandidateVoteDone> {
                   const SizedBox(
                     height: 35,
                   ),
-                  SizedBox(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Container(
-                          height: 55,
-                          width: 55,
-                          decoration: const BoxDecoration(
-                            border: GradientBoxBorder(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Color.fromARGB(255, 183, 241, 22),
-                                  Color.fromRGBO(243, 228, 14, 0.004)
-                                ],
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                              ),
-                              width: 3,
-                            ),
-                            shape: BoxShape.circle,
-                          ),
-                          child: Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              '${widget.candidateVote}',
-                              style: const TextStyle(
-                                  fontFamily: 'georgia',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        const Text(
-                          'Votes',
-                          style: TextStyle(fontFamily: 'georgia'),
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
             ),
@@ -153,12 +104,13 @@ class _CandidateVoteDoneState extends State<CandidateVoteDone> {
                   backgroundColor: const Color.fromARGB(255, 240, 66, 66),
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('See Results'),
+                child: const Text('Back to candidate list'),
                 onPressed: () {
                   setState(() {});
-                  Navigator.push(
+                  Navigator.pushReplacement(
                     context,
-                    MaterialPageRoute(builder: (context) => MyWidgetIndex(2)),
+                    MaterialPageRoute(
+                        builder: (context) => const MyWidgetHomeApp2()),
                   );
                 },
               ),
