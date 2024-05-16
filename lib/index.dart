@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
-import 'package:omvoting/account.dart';
+import 'package:omvoting/login_page.dart';
+import 'package:omvoting/view/account.dart';
 import 'package:omvoting/view/CandidateDetailsScreen.dart';
 import 'package:omvoting/view/home.dart';
 import 'package:omvoting/news.dart';
@@ -54,7 +55,7 @@ class MyWidgetIndex extends StatefulWidget {
     this.candidateParty = candidateParty;
     this.candidatenumber = candidatenumber;
     this.candidateVote = candidateVote;
-    this.candidateEdu = candidateEdu;
+    this.candidatePic = candidatePic;
     this.candidateEdu = candidateEdu;
     this.candidateExp = candidateExp;
     this.candidateDisc = candidateDisc;
@@ -161,12 +162,38 @@ class _MyWidgetIndexState extends State<MyWidgetIndex> {
                 PopupMenuItem<String>(
                   child: TextButton(
                     onPressed: () {
-                      Navigator.pop(context);
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MyWidgetIndex(3),
+                        ),
+                      );
                     },
                     child: const Text(
-                      "Logout",
+                      "My Account",
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
+                        fontFamily: 'georgia',
+                        color: Color.fromARGB(255, 58, 2, 2),
+                        fontWeight: FontWeight.w200,
+                      ),
+                    ),
+                  ),
+                ),
+                PopupMenuItem<String>(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => MyWidgetIndex(3),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      "Sitting",
+                      style: TextStyle(
+                        fontSize: 18,
                         fontFamily: 'georgia',
                         color: Color.fromARGB(255, 94, 4, 4),
                         fontWeight: FontWeight.w200,
@@ -174,13 +201,26 @@ class _MyWidgetIndexState extends State<MyWidgetIndex> {
                     ),
                   ),
                 ),
-                const PopupMenuItem<String>(
-                  value: 'option2',
-                  child: Text('Option 2'),
-                ),
-                const PopupMenuItem<String>(
-                  value: 'option3',
-                  child: Text('Option 3'),
+                PopupMenuItem<String>(
+                  child: TextButton(
+                    onPressed: () {
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => const LoginScreenClass(),
+                        ),
+                      );
+                    },
+                    child: const Text(
+                      "Logout",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontFamily: 'georgia',
+                        color: Color.fromARGB(255, 94, 4, 4),
+                        fontWeight: FontWeight.w200,
+                      ),
+                    ),
+                  ),
                 ),
               ];
             },
@@ -191,14 +231,14 @@ class _MyWidgetIndexState extends State<MyWidgetIndex> {
       drawer: Drawer(
         child: ListView(
           // Important: Remove any padding from the ListView.
-          padding: EdgeInsets.zero,
+          //    padding: EdgeInsets.zero,
           children: [
             UserAccountsDrawerHeader(
               decoration: const BoxDecoration(
-                color: Color.fromARGB(255, 35, 132, 243),
+                color: Color.fromARGB(255, 196, 75, 81),
               ),
               accountName: const Text(
-                "Online Voting Application",
+                "OMVoting Application",
                 style: TextStyle(
                   fontWeight: FontWeight.bold,
                 ),
@@ -226,8 +266,7 @@ class _MyWidgetIndexState extends State<MyWidgetIndex> {
                   ),
                   shape: BoxShape.circle,
                   image: DecorationImage(
-                    image: NetworkImage(
-                        'https://cdn4.iconfinder.com/data/icons/man-6/48/man-09-512.png'),
+                    image: AssetImage('assets/images/ismael.jpg'),
                     fit: BoxFit
                         .fitHeight, // Adjust this based on your preference
                   ),
@@ -236,23 +275,59 @@ class _MyWidgetIndexState extends State<MyWidgetIndex> {
             ),
             ListTile(
                 leading: const Icon(
-                  Icons.people_outline,
+                  Icons.home_outlined,
                 ),
-                title: const Text('List of parties'),
+                title: const Text('Home'),
                 onTap: () {}),
             ListTile(
               leading: const Icon(
-                Icons.people_outline_outlined,
+                Icons.newspaper_outlined,
               ),
-              title: const Text('List of candidates'),
+              title: const Text('News'),
               onTap: () {
-                // Navigator.push(
-                //   context,
-                //   MaterialPageRoute(
-                //     builder: (BuildContext context) =>
-                //         const MyWidgetInsertCandidates(),
-                //   ),
-                // );
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => const LoginScreenClass(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.timeline,
+              ),
+              title: const Text('Results'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => const LoginScreenClass(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.account_box,
+              ),
+              title: const Text('My Account'),
+              onTap: () {
+                Navigator.pushReplacement(
+                  context,
+                  MaterialPageRoute(
+                    builder: (BuildContext context) => const LoginScreenClass(),
+                  ),
+                );
+              },
+            ),
+            ListTile(
+              leading: const Icon(
+                Icons.settings_rounded,
+              ),
+              title: const Text('Setting'),
+              onTap: () {
+                Navigator.pop(context);
               },
             ),
             ListTile(

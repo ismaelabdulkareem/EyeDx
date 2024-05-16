@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:omvoting/login_page.dart';
+import 'package:omvoting/view/home_app2.dart';
 import 'package:omvoting/view/partieslist_app2.dart';
 import 'package:omvoting/view/candidatelist_app2.dart';
 //import 'package:votingapp/component/myDrawer.dart';
@@ -65,13 +67,11 @@ class _MyWidgetIndex_app2State extends State<MyWidgetIndex_app2> {
               return <PopupMenuEntry<String>>[
                 PopupMenuItem<String>(
                   child: TextButton(
-                    onPressed: () {
-                      Navigator.pop(context);
-                    },
+                    onPressed: () {},
                     child: const Text(
-                      "Logout",
+                      "My Account",
                       style: TextStyle(
-                        fontSize: 20,
+                        fontSize: 18,
                         fontFamily: 'georgia',
                         color: Color.fromARGB(255, 94, 4, 4),
                         fontWeight: FontWeight.w200,
@@ -79,13 +79,42 @@ class _MyWidgetIndex_app2State extends State<MyWidgetIndex_app2> {
                     ),
                   ),
                 ),
-                const PopupMenuItem<String>(
-                  value: 'option2',
-                  child: Text('Option 2'),
+                PopupMenuItem<String>(
+                  child: TextButton(
+                    onPressed: () {},
+                    child: const Text(
+                      "Sitting",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontFamily: 'georgia',
+                        color: Color.fromARGB(255, 94, 4, 4),
+                        fontWeight: FontWeight.w200,
+                      ),
+                    ),
+                  ),
                 ),
-                const PopupMenuItem<String>(
-                  value: 'option3',
-                  child: Text('Option 3'),
+                PopupMenuItem<String>(
+                  child: TextButton(
+                    onPressed: () {
+                      // Navigator.push(
+                      //   context,
+                      //   MaterialPageRoute(
+                      //     builder: (BuildContext context) =>
+                      //         const LoginScreenClass(),
+                      //   ),
+                      // );
+                      navigator?.pop(context);
+                    },
+                    child: const Text(
+                      "Logout",
+                      style: TextStyle(
+                        fontSize: 18,
+                        fontFamily: 'georgia',
+                        color: Color.fromARGB(255, 94, 4, 4),
+                        fontWeight: FontWeight.w200,
+                      ),
+                    ),
+                  ),
                 ),
               ];
             },
@@ -143,13 +172,21 @@ class _MyWidgetIndex_app2State extends State<MyWidgetIndex_app2> {
                 leading: const Icon(
                   Icons.people_outline,
                 ),
-                title: const Text('List of parties'),
-                onTap: () {}),
+                title: const Text('List of candidates'),
+                onTap: () {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (BuildContext context) =>
+                          const MyWidgetHomeApp2(),
+                    ),
+                  );
+                }),
             ListTile(
               leading: const Icon(
                 Icons.people_outline_outlined,
               ),
-              title: const Text('List of candidates'),
+              title: const Text('List of parties'),
               onTap: () {
                 // Navigator.push(
                 //   context,

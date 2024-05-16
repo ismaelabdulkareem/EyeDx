@@ -5,7 +5,10 @@ import 'package:omvoting/index.dart';
 import 'package:omvoting/model/candList_app2_model.dart';
 import 'package:omvoting/view/CandidateDetailsScreen.dart';
 import 'package:omvoting/view/CandidateDetailsScreen_app2.dart';
+import 'package:omvoting/view/Componets/AppBarApp2.dart';
+import 'package:omvoting/view/index_app2.dart';
 import 'package:omvoting/viewModel/candListApp2_viewModel.dart';
+import 'package:omvoting/view/Componets/AppBarApp2.dart';
 
 class MyWidgetHomeApp2 extends StatefulWidget {
   const MyWidgetHomeApp2({super.key});
@@ -27,8 +30,37 @@ class _MyWidgetHomeApp2State extends State<MyWidgetHomeApp2> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Candidate List'),
+        automaticallyImplyLeading: false,
+        title: const Padding(
+          padding: EdgeInsets.only(left: 20), // Adjust left padding as needed
+          child: Row(
+            children: [
+              Icon(Icons.account_box),
+              SizedBox(width: 8),
+              Text(
+                'Candidate List',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontFamily: 'georgia',
+                  color: Color.fromARGB(255, 7, 1, 90),
+                  fontWeight: FontWeight.w200,
+                ),
+              ),
+            ],
+          ),
+        ),
         backgroundColor: const Color.fromARGB(255, 191, 206, 245),
+        actions: <Widget>[
+          Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: 20), // Adjust horizontal padding as needed
+            child: IconButton(
+              icon:
+                  const Icon(Icons.add_outlined), // Your additional button icon
+              onPressed: () {},
+            ),
+          ),
+        ],
       ),
       body: Container(
         width: double.infinity,
@@ -84,6 +116,9 @@ class _MyWidgetHomeApp2State extends State<MyWidgetHomeApp2> {
                 },
               ),
             ),
+            const SizedBox(
+              height: 10,
+            )
           ],
         ),
       ),

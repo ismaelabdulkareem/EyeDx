@@ -18,7 +18,7 @@ class newCandidateApp2 extends StatelessWidget {
     return Container(
       // my style
       padding: const EdgeInsets.only(left: 15, right: 15, top: 10, bottom: 10),
-      margin: const EdgeInsets.only(left: 30, right: 30, top: 5),
+      margin: const EdgeInsets.only(left: 20, right: 30, top: 5),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [

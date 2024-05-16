@@ -40,8 +40,7 @@ class _MyWidgetAccState extends State<MyWidgetAcc> {
                           ),
                           shape: BoxShape.circle,
                           image: DecorationImage(
-                            image: NetworkImage(
-                                'https://cdn4.iconfinder.com/data/icons/man-6/48/man-09-512.png'),
+                            image: AssetImage('assets/images/ismael.jpg'),
                             fit: BoxFit
                                 .fitHeight, // Adjust this based on your preference
                           ),

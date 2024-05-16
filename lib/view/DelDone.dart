@@ -26,8 +26,37 @@ class _CandidateDelDoneState extends State<CandidateDelDone> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Candidate Deletion'),
+        automaticallyImplyLeading: false,
+        title: const Padding(
+          padding: EdgeInsets.only(left: 20), // Adjust left padding as needed
+          child: Row(
+            children: [
+              Icon(Icons.delete_rounded),
+              SizedBox(width: 8),
+              Text(
+                'Candidate Deletion',
+                style: TextStyle(
+                  fontSize: 20,
+                  fontFamily: 'georgia',
+                  color: Color.fromARGB(255, 7, 1, 90),
+                  fontWeight: FontWeight.w200,
+                ),
+              ),
+            ],
+          ),
+        ),
         backgroundColor: const Color.fromARGB(255, 191, 206, 245),
+        actions: <Widget>[
+          Padding(
+            padding: const EdgeInsets.symmetric(
+                horizontal: 20), // Adjust horizontal padding as needed
+            child: IconButton(
+              icon:
+                  const Icon(Icons.add_outlined), // Your additional button icon
+              onPressed: () {},
+            ),
+          ),
+        ],
       ),
       body: Container(
         child: Column(
