@@ -66,43 +66,58 @@ class _MyWidgetCandDetailApp2State extends State<MyWidgetCandDetailApp2> {
       ),
       body: Column(
         children: [
-          Expanded(
-            child: StreamBuilder<List<CandListApp2_Model>>(
-              stream: _viewModel1.allCandList.stream,
-              builder: (context, snapshot) {
-                if (_viewModel1.isLoading.value &&
-                    snapshot.connectionState == ConnectionState.waiting) {
-                  return const Center(child: CircularProgressIndicator());
-                }
+          Container(
+            width: double.infinity,
+            height: 760,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color.fromARGB(255, 74, 117, 236), // First color
+                  Color.fromARGB(255, 182, 230, 252), // Second color
+                  Colors.blue, // Third color
+                ],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              ),
+            ),
+            child: Expanded(
+              child: StreamBuilder<List<CandListApp2_Model>>(
+                stream: _viewModel1.allCandList.stream,
+                builder: (context, snapshot) {
+                  if (_viewModel1.isLoading.value &&
+                      snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-                if (snapshot.hasError) {
-                  return Center(child: Text('Error: ${snapshot.error}'));
-                }
+                  if (snapshot.hasError) {
+                    return Center(child: Text('Error: ${snapshot.error}'));
+                  }
 
-                final List<CandListApp2_Model>? candidates = snapshot.data;
+                  final List<CandListApp2_Model>? candidates = snapshot.data;
 
-                if (candidates == null || candidates.isEmpty) {
-                  return const Center(child: Text('No candidates available'));
-                }
+                  if (candidates == null || candidates.isEmpty) {
+                    return const Center(child: Text('No candidates available'));
+                  }
 
-                return ListView.builder(
-                  itemCount: candidates.length,
-                  itemBuilder: (context, index) {
-                    final candidate = candidates[index];
+                  return ListView.builder(
+                    itemCount: candidates.length,
+                    itemBuilder: (context, index) {
+                      final candidate = candidates[index];
 
-                    return CandidateDitailDel(
-                      candidateName: candidate.candName,
-                      candidateParty: candidate.candPart,
-                      candidatenumber: candidate.candNo,
-                      candidateVote: candidate.candVotes,
-                      candidatePic: candidate.candImg,
-                      candidateEdu: candidate.candEdu,
-                      candidateExp: candidate.candEdu,
-                      candidateDisc: candidate.candDisc,
-                    );
-                  },
-                );
-              },
+                      return CandidateDitailDel(
+                        candidateName: candidate.candName,
+                        candidateParty: candidate.candPart,
+                        candidatenumber: candidate.candNo,
+                        candidateVote: candidate.candVotes,
+                        candidatePic: candidate.candImg,
+                        candidateEdu: candidate.candEdu,
+                        candidateExp: candidate.candEdu,
+                        candidateDisc: candidate.candDisc,
+                      );
+                    },
+                  );
+                },
+              ),
             ),
           ),
         ],

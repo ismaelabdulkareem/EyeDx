@@ -47,12 +47,16 @@ class _CandidateDitailDelState extends State<CandidateDitailDel> {
             padding: const EdgeInsets.symmetric(horizontal: 60, vertical: 20),
             margin:
                 const EdgeInsets.only(top: 15, bottom: 25, right: 20, left: 20),
-            decoration: BoxDecoration(
-              borderRadius: const BorderRadius.all(Radius.circular(10)),
-              border: Border.all(
-                color: const Color.fromARGB(255, 107, 105, 105),
-                width: 1.0,
+            decoration: const BoxDecoration(
+              gradient: LinearGradient(
+                colors: [
+                  Color.fromARGB(255, 207, 217, 240),
+                  Color.fromARGB(255, 248, 241, 241),
+                ],
+                begin: Alignment.centerLeft,
+                end: Alignment.centerRight,
               ),
+              borderRadius: BorderRadius.all(Radius.circular(10)),
             ),
             child: Column(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,

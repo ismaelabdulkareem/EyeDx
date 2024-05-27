@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:omvoting/login_page.dart';
+import 'package:omvoting/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'firebase_options.dart';
 
@@ -12,7 +12,7 @@ Future<void> main() async {
 
     runApp(
       const MaterialApp(
-        home: LoginScreenClass(),
+        home: Splash(),
         debugShowCheckedModeBanner: false,
         title: "Voting App",
       ),
