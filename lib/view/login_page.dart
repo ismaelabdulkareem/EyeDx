@@ -2,13 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/material.dart';
 import 'package:fluttertoast/fluttertoast.dart';
-
-import 'package:omvoting/component/textfiled.dart';
-import 'package:omvoting/firebase_auth/authServices.dart';
-import 'package:omvoting/index.dart';
-import 'package:omvoting/view/index_app2.dart';
-
-import 'package:omvoting/firebase_auth/register_page.dart';
+import 'package:omvoting/view/home.dart';
 
 class LoginScreenClass extends StatefulWidget {
   const LoginScreenClass({super.key});
@@ -18,7 +12,6 @@ class LoginScreenClass extends StatefulWidget {
 }
 
 class _LoginScreenClassState extends State<LoginScreenClass> {
-  final firebaseAuthServices _authe = firebaseAuthServices();
   String _user_name = 'w';
   String _password = "w";
   String msgAlert = '';
@@ -87,53 +80,16 @@ class _LoginScreenClassState extends State<LoginScreenClass> {
               key: _formKey,
               child: Column(
                 children: <Widget>[
-                  myTextFiled(
-                    myHit: 'Username or Email',
-                    MyPrefIcon: const Icon(Icons.person),
-                    myController: _user_controller,
-                    myObscureText: false,
-                    myValidator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your username or email';
-                      }
-                      return null;
-                    },
-                  ),
                   const SizedBox(height: 10),
-                  myTextFiled(
-                    myController: _pass_controller,
-                    myObscureText: true,
-                    myHit: 'Password',
-                    MyPrefIcon: const Icon(Icons.lock),
-                    myValidator: (value) {
-                      if (value == null || value.isEmpty) {
-                        return 'Please enter your password';
-                      }
-                      return null;
-                    },
-                  ),
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
-                      if (_formKey.currentState!.validate()) {
-                        sign_In();
-
-                        //   String username = _user_controller.text;
-                        //   String password = _pass_controller.text;
-                        //   if (username == 'w' && password == 'w') {
-                        //     Navigator.pushReplacement(
-                        //       context,
-                        //       MaterialPageRoute(
-                        //         builder: (BuildContext context) =>
-                        //             MyWidgetIndex(0),
-                        //       ),
-                        //     );
-                        //   } else {
-                        //     setState(() {
-                        //       _showMessage('Incorrect username or password');
-                        //     });
-                        //   }
-                      }
+                      Navigator.pushReplacement(
+                        context,
+                        MaterialPageRoute(
+                          builder: (BuildContext context) => HomeClass(),
+                        ),
+                      );
                     },
                     child: const Text(
                       'Login',
@@ -183,14 +139,7 @@ class _LoginScreenClassState extends State<LoginScreenClass> {
                 backgroundColor: const Color.fromARGB(255, 230, 45, 45),
                 foregroundColor: Colors.white,
               ),
-              onPressed: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (BuildContext context) => const MyWidgetReg(),
-                  ),
-                );
-              },
+              onPressed: () {},
               child: const Text(
                 'Register',
                 style: TextStyle(
@@ -201,56 +150,10 @@ class _LoginScreenClassState extends State<LoginScreenClass> {
               ),
             ),
           ),
-          TextButton(
-            onPressed: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (BuildContext context) => const MyWidgetIndex_app2(),
-                ),
-              );
-            },
-            child: const Text(
-              "Admin Page!",
-              style: TextStyle(
-                fontFamily: 'georgia',
-                color: Color.fromARGB(255, 64, 8, 128),
-                fontWeight: FontWeight.w200,
-              ),
-            ),
-          ),
         ],
       ),
     );
   }
 
   // ignore: non_constant_identifier_names
-  void sign_In() async {
-    String email = _user_controller.text;
-    String pass = _pass_controller.text;
-
-    try {
-      final user = await _authe.sighIn(email, pass);
-      if (user != null) {
-        Navigator.pushReplacement(
-          context,
-          MaterialPageRoute(
-            builder: (BuildContext context) => MyWidgetIndex(0),
-          ),
-        );
-      } else {
-        _showMessage('Incorrect username or password');
-      }
-    } catch (e) {
-      Fluttertoast.showToast(
-        msg: "Failed to login user:\n $e",
-        toastLength: Toast.LENGTH_SHORT,
-        gravity: ToastGravity.TOP,
-        timeInSecForIosWeb: 5,
-        backgroundColor: Colors.red.withOpacity(0.7),
-        textColor: Colors.white,
-        fontSize: 16.0,
-      );
-    }
-  }
 }

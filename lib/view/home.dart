@@ -1,84 +1,136 @@
+import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
-import 'package:omvoting/component/candidates.dart';
-import 'package:omvoting/index.dart';
-import 'package:omvoting/model/candList_app2_model.dart';
-import 'package:omvoting/view/CandidateDetailsScreen.dart';
-import 'package:omvoting/viewModel/candListApp2_viewModel.dart';
+import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 
-class MyWidgetHome extends StatefulWidget {
-  const MyWidgetHome({super.key});
-
+class HomeClass extends StatefulWidget {
   @override
-  _MyWidgetHomeState createState() => _MyWidgetHomeState();
+  State<HomeClass> createState() => _HomeClass();
 }
 
-class _MyWidgetHomeState extends State<MyWidgetHome> {
-  final CandView_Model _viewModel = CandView_Model();
-
-  @override
-  void initState() {
-    super.initState();
-    _viewModel.fetchAllCand();
-  }
-
+class _HomeClass extends State<HomeClass> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Container(
-        width: double.infinity,
         child: Column(
           children: [
-            const SizedBox(
-              height: 15,
-            ),
-            Expanded(
-              child: StreamBuilder<List<CandListApp2_Model>>(
-                stream: _viewModel.allCandList.stream,
-                builder: (context, snapshot) {
-                  if (_viewModel.isLoading.value &&
-                      snapshot.connectionState == ConnectionState.waiting) {
-                    return const Center(child: CircularProgressIndicator());
-                  }
-
-                  if (snapshot.hasError) {
-                    return Center(child: Text('Error: ${snapshot.error}'));
-                  }
-
-                  final List<CandListApp2_Model>? candidates = snapshot.data;
-
-                  if (candidates == null || candidates.isEmpty) {
-                    return const Center(child: Text('No candidates available'));
-                  }
-
-                  return ListView.builder(
-                    itemCount: candidates.length,
-                    itemBuilder: (context, index) {
-                      final candidate = candidates[index];
-                      return GestureDetector(
-                        onTap: () {
-                          String docId = candidate.candNo;
-                          Navigator.push(
-                            context,
-                            MaterialPageRoute(
-                              builder: (context) => MyWidgetIndex.cons2(
-                                  "toVote", docId.toString()),
-                              //MyWidgetCandDetail(documentId: docId),
-                            ),
-                          );
-                        },
-                        child: newCandidate(
-                          candidateName: candidate.candName,
-                          candidateParty: candidate.candPart,
-                          candidatenumber: candidate.candNo,
-                          candidateVote: candidate.candVotes.toString(),
-                          candidatePic: candidate.candImg,
-                          candidateEdu: candidate.candEdu,
-                          candidateExp: candidate.candEdu,
-                          candidateDisc: candidate.candDisc,
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
+              margin: const EdgeInsets.only(
+                  top: 15, bottom: 25, right: 20, left: 20),
+              decoration: const BoxDecoration(
+                boxShadow: [],
+              ),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: <Widget>[
+                  Container(
+                    height: 150,
+                    width: 150,
+                    decoration: BoxDecoration(
+                      border: Border.all(
+                        color: const Color.fromARGB(
+                            255, 43, 20, 170), // Border color
+                        width: 3.0,
+                        // Border width
+                      ),
+                      shape: BoxShape.circle,
+                      image: const DecorationImage(
+                        image: NetworkImage(""),
+                        fit: BoxFit
+                            .cover, // Adjust this based on your preference
+                      ),
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  const SizedBox(
+                    child: Column(
+                      children: <Widget>[
+                        SizedBox(
+                          child: Text(
+                            'Voting to  ${""} successfully submitted',
+                            style: TextStyle(
+                                fontFamily: 'georgia',
+                                fontSize: 14,
+                                color: Colors.green),
+                          ),
                         ),
-                      );
-                    },
-                  );
+                        SizedBox(
+                          height: 15,
+                        ),
+                        SizedBox(
+                          child: Text(
+                            // 'Candidate Number :  ${widget.candidatenumber} ',
+                            'Thank you for your participating',
+                            style: TextStyle(
+                              fontFamily: 'georgia',
+                              fontSize: 16,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                  const SizedBox(
+                    height: 35,
+                  ),
+                  SizedBox(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: <Widget>[
+                        Container(
+                          height: 55,
+                          width: 55,
+                          decoration: const BoxDecoration(
+                            border: GradientBoxBorder(
+                              gradient: LinearGradient(
+                                colors: [
+                                  Color.fromARGB(255, 183, 241, 22),
+                                  Color.fromRGBO(243, 228, 14, 0.004)
+                                ],
+                                begin: Alignment.topCenter,
+                                end: Alignment.bottomCenter,
+                              ),
+                              width: 3,
+                            ),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Align(
+                            alignment: Alignment.center,
+                            child: Text(
+                              "",
+                              style: TextStyle(
+                                  fontFamily: 'georgia',
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.bold),
+                            ),
+                          ),
+                        ),
+                        const Text(
+                          'Votes',
+                          style: TextStyle(fontFamily: 'georgia'),
+                        ),
+                        const SizedBox(
+                          height: 20,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            Align(
+              alignment: Alignment.center,
+              child: ElevatedButton(
+                style: OutlinedButton.styleFrom(
+                  backgroundColor: const Color.fromARGB(255, 240, 66, 66),
+                  foregroundColor: Colors.white,
+                ),
+                child: const Text('See Results'),
+                onPressed: () {
+                  setState(() {});
                 },
               ),
             ),

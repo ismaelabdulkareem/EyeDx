@@ -20,6 +20,13 @@
             "request": "launch",
             "type": "dart",
             "flutterMode": "release"
+        },
+        {
+            "name": "Flutter (Redmi Note 9S)",
+            "request": "launch",
+            "type": "dart",
+            "program": "lib/main.dart"
         }
+          
     ]
 }
