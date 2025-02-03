@@ -7,7 +7,9 @@
         {
             "name": "omvoting",
             "request": "launch",
-            "type": "dart"
+            "type": "dart",
+            "program": "lib/View/main.dart",
+            "cwd": "${workspaceFolder}"
         },
         {
             "name": "omvoting (profile mode)",
@@ -25,7 +27,7 @@
             "name": "Flutter (Redmi Note 9S)",
             "request": "launch",
             "type": "dart",
-            "program": "lib/main.dart"
+            "program": "lib/View/main.dart"
         }
           
     ]

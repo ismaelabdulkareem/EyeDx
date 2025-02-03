@@ -1,123 +1,82 @@
-import 'package:flutter/cupertino.dart';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:image/image.dart' as img;
 
 class HomeClass extends StatefulWidget {
+  const HomeClass({super.key});
+
   @override
-  State<HomeClass> createState() => _HomeClass();
+  State<HomeClass> createState() => _HomeClassState();
 }
 
-class _HomeClass extends State<HomeClass> {
+class _HomeClassState extends State<HomeClass> {
+  final ImagePicker imgPicker = ImagePicker();
+  File? imgFile;
+
+  Future<void> choosePic() async {
+    try {
+      final XFile? image =
+          await imgPicker.pickImage(source: ImageSource.gallery);
+      if (image != null) {
+        File selectedFile = File(image.path);
+
+        // Apply preprocessing
+        File processedFile = await preprocessImage(selectedFile);
+
+        setState(() {
+          imgFile = processedFile;
+        });
+      } else {
+        // User canceled the image picker
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text("No image selected!")),
+        );
+      }
+    } catch (e) {
+      debugPrint("Error picking image: $e");
+    }
+  }
+
+  Future<File> preprocessImage(File file) async {
+    final rawImage = img.decodeImage(await file.readAsBytes());
+    if (rawImage == null) throw Exception("Could not decode image");
+
+    // Resize to 224x224
+    var processedImage = img.copyResize(rawImage, width: 224, height: 224);
+
+    // Convert to grayscale
+    processedImage = img.grayscale(processedImage);
+
+    // Apply contrast enhancement
+    processedImage = img.adjustColor(processedImage, contrast: 1.5);
+
+    // Save processed image
+    final newFile = File(file.path)
+      ..writeAsBytesSync(img.encodeJpg(processedImage));
+    return newFile;
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: Container(
+      body: SingleChildScrollView(
         child: Column(
           children: [
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 20),
-              margin: const EdgeInsets.only(
-                  top: 15, bottom: 25, right: 20, left: 20),
-              decoration: const BoxDecoration(
-                boxShadow: [],
-              ),
+              padding: const EdgeInsets.symmetric(horizontal: 5, vertical: 100),
+              margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 25),
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: <Widget>[
-                  Container(
-                    height: 150,
-                    width: 150,
-                    decoration: BoxDecoration(
-                      border: Border.all(
-                        color: const Color.fromARGB(
-                            255, 43, 20, 170), // Border color
-                        width: 3.0,
-                        // Border width
-                      ),
-                      shape: BoxShape.circle,
-                      image: const DecorationImage(
-                        image: NetworkImage(""),
-                        fit: BoxFit
-                            .cover, // Adjust this based on your preference
-                      ),
-                    ),
+                  _pickImage(),
+                  const SizedBox(height: 10),
+                  const Text(
+                    'Thank you for your participation',
+                    style: TextStyle(fontFamily: 'georgia', fontSize: 16),
                   ),
-                  const SizedBox(
-                    height: 10,
-                  ),
-                  const SizedBox(
-                    child: Column(
-                      children: <Widget>[
-                        SizedBox(
-                          child: Text(
-                            'Voting to  ${""} successfully submitted',
-                            style: TextStyle(
-                                fontFamily: 'georgia',
-                                fontSize: 14,
-                                color: Colors.green),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 15,
-                        ),
-                        SizedBox(
-                          child: Text(
-                            // 'Candidate Number :  ${widget.candidatenumber} ',
-                            'Thank you for your participating',
-                            style: TextStyle(
-                              fontFamily: 'georgia',
-                              fontSize: 16,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                  const SizedBox(
-                    height: 35,
-                  ),
-                  SizedBox(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: <Widget>[
-                        Container(
-                          height: 55,
-                          width: 55,
-                          decoration: const BoxDecoration(
-                            border: GradientBoxBorder(
-                              gradient: LinearGradient(
-                                colors: [
-                                  Color.fromARGB(255, 183, 241, 22),
-                                  Color.fromRGBO(243, 228, 14, 0.004)
-                                ],
-                                begin: Alignment.topCenter,
-                                end: Alignment.bottomCenter,
-                              ),
-                              width: 3,
-                            ),
-                            shape: BoxShape.circle,
-                          ),
-                          child: const Align(
-                            alignment: Alignment.center,
-                            child: Text(
-                              "",
-                              style: TextStyle(
-                                  fontFamily: 'georgia',
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold),
-                            ),
-                          ),
-                        ),
-                        const Text(
-                          'Votes',
-                          style: TextStyle(fontFamily: 'georgia'),
-                        ),
-                        const SizedBox(
-                          height: 20,
-                        ),
-                      ],
-                    ),
-                  ),
+                  const SizedBox(height: 35),
                 ],
               ),
             ),
@@ -125,16 +84,56 @@ class _HomeClass extends State<HomeClass> {
               alignment: Alignment.center,
               child: ElevatedButton(
                 style: OutlinedButton.styleFrom(
-                  backgroundColor: const Color.fromARGB(255, 240, 66, 66),
+                  backgroundColor: Colors.redAccent,
                   foregroundColor: Colors.white,
                 ),
-                child: const Text('See Results'),
+                child: const Text('Predict'),
                 onPressed: () {
-                  setState(() {});
+                  // Future action for prediction
+                  ScaffoldMessenger.of(context).showSnackBar(
+                    const SnackBar(
+                        content:
+                            Text("Prediction feature not implemented yet.")),
+                  );
                 },
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  Widget _pickImage() {
+    return InkWell(
+      onTap: choosePic,
+      child: Container(
+        height: 250,
+        width: 250,
+        decoration: BoxDecoration(
+          border: const GradientBoxBorder(
+            gradient: LinearGradient(
+              colors: [Colors.blue, Colors.transparent],
+              begin: Alignment.centerLeft,
+              end: Alignment.bottomRight,
+            ),
+            width: 5,
+          ),
+          gradient: const LinearGradient(
+            colors: [Color.fromARGB(255, 169, 209, 241), Colors.white],
+            begin: Alignment.bottomLeft,
+            end: Alignment.centerLeft,
+          ),
+          shape: BoxShape.circle,
+          image: imgFile == null
+              ? const DecorationImage(
+                  image: AssetImage('assets/images/partyApp2.png'),
+                  fit: BoxFit.cover,
+                )
+              : DecorationImage(
+                  image: FileImage(imgFile!),
+                  fit: BoxFit.cover,
+                ),
         ),
       ),
     );

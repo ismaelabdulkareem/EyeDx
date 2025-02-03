@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:omvoting/View/splash_screen.dart';
 import 'package:firebase_core/firebase_core.dart';
 import '../firebase_options.dart';
+import 'package:omvoting/view/home.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -12,7 +13,7 @@ Future<void> main() async {
 
     runApp(
       const MaterialApp(
-        home: Splash(),
+        home: HomeClass(),
         debugShowCheckedModeBanner: false,
         title: "Fundus Classify",
       ),
