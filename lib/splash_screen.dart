@@ -13,8 +13,8 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
   @override
   void initState() {
     super.initState();
-    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersive);
-    Future.delayed(const Duration(seconds: 2), () {
+    SystemChrome.setEnabledSystemUIMode(SystemUiMode.immersiveSticky);
+    Future.delayed(const Duration(seconds: 3), () {
       Navigator.of(context).pushReplacement(
         MaterialPageRoute(
           builder: (_) => const LoginScreenClass(),
@@ -36,7 +36,7 @@ class _SplashState extends State<Splash> with SingleTickerProviderStateMixin {
       body: Container(
         decoration: const BoxDecoration(
           image: DecorationImage(
-              image: ExactAssetImage('assets/images/splash.png'),
+              image: ExactAssetImage('assets/images/splash03.png'),
               fit: BoxFit.fill),
         ),
       ),

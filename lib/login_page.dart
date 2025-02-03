@@ -115,24 +115,25 @@ class _LoginScreenClassState extends State<LoginScreenClass> {
                   const SizedBox(height: 20),
                   ElevatedButton(
                     onPressed: () {
-                      // if (_formKey.currentState!.validate()) {
-                      //sign_In();
+                      if (_formKey.currentState!.validate()) {
+                        sign_In();
 
-                      // String username = _user_controller.text;
-                      // String password = _pass_controller.text;
-                      // if (username == 'w' && password == 'w') {
-                      Navigator.pushReplacement(
-                        context,
-                        MaterialPageRoute(
-                          builder: (BuildContext context) => MyWidgetIndex(0),
-                        ),
-                      );
-                      // } else {
-                      //   setState(() {
-                      //     _showMessage('Incorrect username or password');
-                      //   });
-                      // }
-                      // }
+                        //   String username = _user_controller.text;
+                        //   String password = _pass_controller.text;
+                        //   if (username == 'w' && password == 'w') {
+                        //     Navigator.pushReplacement(
+                        //       context,
+                        //       MaterialPageRoute(
+                        //         builder: (BuildContext context) =>
+                        //             MyWidgetIndex(0),
+                        //       ),
+                        //     );
+                        //   } else {
+                        //     setState(() {
+                        //       _showMessage('Incorrect username or password');
+                        //     });
+                        //   }
+                      }
                     },
                     child: const Text(
                       'Login',

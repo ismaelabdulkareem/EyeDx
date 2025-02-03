@@ -348,7 +348,7 @@ class _MyWidgetRegState extends State<MyWidgetReg> {
         );
       } else {
         Fluttertoast.showToast(
-          msg: "Failed to create user",
+          msg: "Failed to create user N",
           toastLength: Toast.LENGTH_SHORT,
           gravity: ToastGravity.TOP,
           timeInSecForIosWeb: 5,

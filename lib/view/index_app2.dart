@@ -54,7 +54,7 @@ class _MyWidgetIndex_app2State extends State<MyWidgetIndex_app2> {
         title: Container(
           padding: const EdgeInsets.only(bottom: 30),
           child: const Text(
-            'List',
+            'Adding Informatin',
             style: TextStyle(color: Colors.white),
           ),
         ),

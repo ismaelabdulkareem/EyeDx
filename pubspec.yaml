@@ -50,7 +50,8 @@ dependencies:
   provider: ^6.1.2
   firebase_auth: ^4.19.4
   flutter_colorpicker: ^1.0.3
-  flutter_launcher_icons: ^0.13.1
+  flutter_launcher_icons: ^0.14.3
+  rename: ^3.0.2
 
 dev_dependencies:
   flutter_test:
@@ -59,7 +60,7 @@ dev_dependencies:
 flutter_launcher_icons:
   android: "launcher_icon"
   ios: true
-  image_path: "assets/images/OMVoting.png"
+  image_path: "assets/images/icon.jpg"
   # The "flutter_lints" package below contains a set of recommended lints to
   # encourage good coding practices. The lint set provided by the package is
   # activated in the `analysis_options.yaml` file located at the root of your
@@ -83,6 +84,9 @@ flutter:
  
     - assets/images/loginBar.png
     - assets/images/splash.png
+    - assets/images/splash01.png
+    - assets/images/splash02.png
+    - assets/images/splash03.png
     - assets/images/a.png
     - assets/images/b.png
     - assets/images/c.png
