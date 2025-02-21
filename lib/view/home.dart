@@ -1,8 +1,11 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter/widgets.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
+import 'package:lucide_icons/lucide_icons.dart'; // Add 'lucide_icons' to pubspec.yaml
 
 class HomeClass extends StatefulWidget {
   const HomeClass({super.key});
@@ -14,25 +17,20 @@ class HomeClass extends StatefulWidget {
 class _HomeClassState extends State<HomeClass> {
   final ImagePicker imgPicker = ImagePicker();
   File? imgFile;
+  File? processedImgFile;
 
   Future<void> choosePic() async {
     try {
       final XFile? image =
           await imgPicker.pickImage(source: ImageSource.gallery);
       if (image != null) {
-        File selectedFile = File(image.path);
-
-        // Apply preprocessing
-        File processedFile = await preprocessImage(selectedFile);
-
         setState(() {
-          imgFile = processedFile;
+          imgFile = File(image.path);
+          processedImgFile =
+              null; // Reset processed image when selecting a new image
         });
       } else {
-        // User canceled the image picker
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("No image selected!")),
-        );
+        _showSnackbar("No image selected!");
       }
     } catch (e) {
       debugPrint("Error picking image: $e");
@@ -44,39 +42,55 @@ class _HomeClassState extends State<HomeClass> {
       final XFile? image =
           await imgPicker.pickImage(source: ImageSource.camera);
       if (image != null) {
-        File selectedFile = File(image.path);
-
-        // Apply preprocessing
-        File processedFile = await preprocessImage(selectedFile);
-
         setState(() {
-          imgFile = processedFile;
+          imgFile = File(image.path);
+          processedImgFile =
+              null; // Reset processed image when selecting a new image
         });
       } else {
-        // User canceled the camera
-        ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text("No image captured!")),
-        );
+        _showSnackbar("No image captured!");
       }
     } catch (e) {
       debugPrint("Error opening camera: $e");
     }
   }
 
-  Future<File> preprocessImage(File file) async {
-    final rawImage = img.decodeImage(await file.readAsBytes());
-    if (rawImage == null) throw Exception("Could not decode image");
+  Future<void> preprocessImage() async {
+    if (imgFile == null) {
+      _showSnackbar("No image selected!");
+      return;
+    }
+    try {
+      final rawImage = img.decodeImage(await imgFile!.readAsBytes());
+      if (rawImage == null) throw Exception("Could not decode image");
 
-    // Resize to 224x224
-    var processedImage = img.copyResize(rawImage, width: 224, height: 224);
+      // Resize to 224x224
+      var processedImage = img.copyResize(rawImage, width: 224, height: 224);
 
-    // Apply contrast enhancement
-    processedImage = img.adjustColor(processedImage, contrast: 1.5);
+      // Apply contrast enhancement
+      processedImage = img.adjustColor(processedImage, contrast: 1.5);
 
-    // Save processed image
-    final newFile = File(file.path)
-      ..writeAsBytesSync(img.encodeJpg(processedImage));
-    return newFile;
+// Save the processed image in the app's temporary directory
+      final directory = await getTemporaryDirectory();
+      final processedFilePath =
+          '${directory.path}/processed_${DateTime.now().millisecondsSinceEpoch}.jpg';
+      final newFile = File(processedFilePath)
+        ..writeAsBytesSync(img.encodeJpg(processedImage));
+
+      setState(() {
+        processedImgFile = newFile; // Update `processedImgFile` to `imgFile`
+      });
+
+      _showSnackbar("Image preprocessing complete!");
+    } catch (e) {
+      debugPrint("Error processing image: $e");
+      _showSnackbar("Image processing failed!");
+    }
+  }
+
+  void _showSnackbar(String message) {
+    ScaffoldMessenger.of(context)
+        .showSnackBar(SnackBar(content: Text(message)));
   }
 
   @override
@@ -86,44 +100,86 @@ class _HomeClassState extends State<HomeClass> {
         child: Column(
           children: [
             const SizedBox(height: 50),
-            const SizedBox(
-              width: 350, // Adjust width as needed
-              child: Text(
-                "This App performs multiclass classification of four types of eye diseases including Diabetic retinopathy (DR), Cataract, Glaucoma and normal fundus. ",
-                textAlign: TextAlign.justify, // Align text
-                style: TextStyle(fontSize: 16, color: Colors.black),
-              ),
-            ),
-            const SizedBox(height: 20),
+            _banner(),
             Container(
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: <Widget>[
-                  _pickImage(),
-                  const SizedBox(width: 20), // Space between widgets
-                  _openCam(),
+              padding: const EdgeInsets.all(15),
+              margin: const EdgeInsets.symmetric(horizontal: 15),
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  colors: [
+                    Color.fromARGB(255, 0, 0, 0),
+                    Color.fromARGB(255, 71, 71, 71)
+                  ], // Blue gradient
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                borderRadius: BorderRadius.only(
+                  bottomLeft: Radius.circular(15),
+                  bottomRight: Radius.circular(15),
+                ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.transparent,
+                    blurRadius: 2,
+                    offset: Offset(2, 2),
+                  ),
+                ],
+              ),
+              child: Table(
+                columnWidths: const {
+                  0: FlexColumnWidth(1),
+                  1: FlexColumnWidth(1),
+                },
+                children: [
+                  const TableRow(
+                    children: [
+                      TableCell(
+                        child: Row(
+                          mainAxisAlignment:
+                              MainAxisAlignment.center, // Center align content
+                          children: [
+                            Icon(LucideIcons.fileInput,
+                                color: Colors.white, size: 24), // Lucide icon
+                            SizedBox(width: 8), // Space between icon and text
+                            Text(
+                              "Choose the Input",
+                              textAlign: TextAlign.center,
+                              style: TextStyle(
+                                fontSize: 16,
+                                color: Colors.white,
+                                fontWeight: FontWeight.w400,
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                      SizedBox(),
+                    ],
+                  ),
+                  const TableRow(
+                    children: [
+                      TableCell(child: SizedBox(height: 16)),
+                      TableCell(child: SizedBox()),
+                    ],
+                  ),
+                  TableRow(
+                    children: [
+                      TableCell(child: Center(child: _pickImage())),
+                      TableCell(child: Center(child: _openCam())),
+                    ],
+                  ),
                 ],
               ),
             ),
+
             _displaySelectedImage(),
-            const SizedBox(height: 50),
-            Align(
-              alignment: Alignment.center,
-              child: ElevatedButton(
-                style: OutlinedButton.styleFrom(
-                  backgroundColor: Colors.redAccent,
-                  foregroundColor: Colors.white,
-                ),
-                child: const Text('Predict'),
-                onPressed: () {
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(
-                      content: Text("Prediction feature not implemented yet."),
-                    ),
-                  );
-                },
-              ),
-            ),
+            const SizedBox(height: 20),
+
+            // Preprocessing Button
+            _preprocessBtn(),
+
+            const SizedBox(height: 20),
+            _predictBtn(),
           ],
         ),
       ),
@@ -139,7 +195,7 @@ class _HomeClassState extends State<HomeClass> {
         decoration: const BoxDecoration(
           border: GradientBoxBorder(
             gradient: LinearGradient(
-              colors: [Colors.blue, Colors.transparent],
+              colors: [Colors.blue, Color.fromARGB(0, 148, 27, 27)],
               begin: Alignment.centerLeft,
               end: Alignment.bottomRight,
             ),
@@ -162,7 +218,7 @@ class _HomeClassState extends State<HomeClass> {
 
   Widget _openCam() {
     return InkWell(
-      onTap: openCamera, // Call openCamera() instead of choosePic()
+      onTap: openCamera,
       child: Container(
         height: 70,
         width: 70,
@@ -183,8 +239,8 @@ class _HomeClassState extends State<HomeClass> {
           shape: BoxShape.circle,
           image: DecorationImage(
             image: AssetImage('assets/images/cam.png'),
-            fit: BoxFit.contain, // Make the icon smaller
-            scale: 1.5, // Reduce icon size
+            fit: BoxFit.contain,
+            scale: 1.5,
             alignment: Alignment.center,
           ),
         ),
@@ -193,20 +249,96 @@ class _HomeClassState extends State<HomeClass> {
   }
 
   Widget _displaySelectedImage() {
-    return imgFile == null
-        ? const SizedBox() // Hide widget if no image is selected
-        : Container(
-            margin: const EdgeInsets.all(20),
-            width: 250, // Adjust size as needed
-            height: 250,
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(10),
-              border: Border.all(color: Colors.blue, width: 3),
-              image: DecorationImage(
-                image: FileImage(imgFile!),
-                fit: BoxFit.cover,
+    return processedImgFile != null
+        ? _imageContainer(processedImgFile!)
+        : imgFile != null
+            ? _imageContainer(imgFile!)
+            : const SizedBox();
+  }
+
+  Widget _imageContainer(File image) {
+    return Container(
+      margin: const EdgeInsets.all(20),
+      width: 250,
+      height: 250,
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(10),
+        border: Border.all(color: Colors.blue, width: 3),
+        image: DecorationImage(
+          image: FileImage(image),
+          fit: BoxFit.cover,
+        ),
+      ),
+    );
+  }
+
+  Widget _preprocessBtn() {
+    return ElevatedButton(
+      style: OutlinedButton.styleFrom(
+        backgroundColor: Colors.orangeAccent,
+        foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+      ),
+      onPressed: preprocessImage,
+      child: const Text('Preprocess Image'),
+    );
+  }
+
+  Widget _predictBtn() {
+    return ElevatedButton(
+      style: OutlinedButton.styleFrom(
+        backgroundColor: const Color.fromARGB(255, 5, 158, 5),
+        foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+      ),
+      child: const Text('Predict'),
+      onPressed: () {
+        _showSnackbar("Prediction feature not implemented yet.");
+      },
+    );
+  }
+
+  Widget _banner() {
+    return Container(
+      padding: const EdgeInsets.all(15),
+      margin: const EdgeInsets.symmetric(horizontal: 15),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color.fromARGB(255, 243, 33, 79),
+            Color.fromARGB(255, 248, 98, 98)
+          ], // Blue gradient
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          topLeft: Radius.circular(15),
+          topRight: Radius.circular(15),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.transparent,
+            blurRadius: 2,
+            offset: Offset(2, 2),
+          ),
+        ],
+      ),
+      child: const Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(LucideIcons.activity, color: Colors.white, size: 32), // Eye icon
+          SizedBox(width: 12),
+          Expanded(
+            child: Text(
+              "This app performs multiclass classification of four types of eye diseases: Diabetic retinopathy (DR), Cataract, Glaucoma, and normal fundus.",
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                fontSize: 16,
+                color: Colors.white,
+                fontWeight: FontWeight.w400,
               ),
             ),
-          );
+          ),
+        ],
+      ),
+    );
   }
 }
