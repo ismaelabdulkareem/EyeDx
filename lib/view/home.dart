@@ -5,7 +5,8 @@ import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
-import 'package:lucide_icons/lucide_icons.dart'; // Add 'lucide_icons' to pubspec.yaml
+import 'package:lucide_icons/lucide_icons.dart';
+import 'package:flutter/animation.dart';
 
 class HomeClass extends StatefulWidget {
   const HomeClass({super.key});
@@ -101,77 +102,7 @@ class _HomeClassState extends State<HomeClass> {
           children: [
             const SizedBox(height: 50),
             _banner(),
-            Container(
-              padding: const EdgeInsets.all(15),
-              margin: const EdgeInsets.symmetric(horizontal: 15),
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [
-                    Color.fromARGB(255, 0, 0, 0),
-                    Color.fromARGB(255, 71, 71, 71)
-                  ], // Blue gradient
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                borderRadius: BorderRadius.only(
-                  bottomLeft: Radius.circular(15),
-                  bottomRight: Radius.circular(15),
-                ),
-                boxShadow: [
-                  BoxShadow(
-                    color: Colors.transparent,
-                    blurRadius: 2,
-                    offset: Offset(2, 2),
-                  ),
-                ],
-              ),
-              child: Table(
-                columnWidths: const {
-                  0: FlexColumnWidth(1),
-                  1: FlexColumnWidth(1),
-                },
-                children: [
-                  const TableRow(
-                    children: [
-                      TableCell(
-                        child: Row(
-                          mainAxisAlignment:
-                              MainAxisAlignment.center, // Center align content
-                          children: [
-                            Icon(LucideIcons.fileInput,
-                                color: Colors.white, size: 24), // Lucide icon
-                            SizedBox(width: 8), // Space between icon and text
-                            Text(
-                              "Choose the Input",
-                              textAlign: TextAlign.center,
-                              style: TextStyle(
-                                fontSize: 16,
-                                color: Colors.white,
-                                fontWeight: FontWeight.w400,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                      SizedBox(),
-                    ],
-                  ),
-                  const TableRow(
-                    children: [
-                      TableCell(child: SizedBox(height: 16)),
-                      TableCell(child: SizedBox()),
-                    ],
-                  ),
-                  TableRow(
-                    children: [
-                      TableCell(child: Center(child: _pickImage())),
-                      TableCell(child: Center(child: _openCam())),
-                    ],
-                  ),
-                ],
-              ),
-            ),
-
+            _tablePickAndOpenCam(),
             _displaySelectedImage(),
             const SizedBox(height: 20),
 
@@ -258,16 +189,34 @@ class _HomeClassState extends State<HomeClass> {
 
   Widget _imageContainer(File image) {
     return Container(
-      margin: const EdgeInsets.all(20),
-      width: 250,
-      height: 250,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(10),
-        border: Border.all(color: Colors.blue, width: 3),
-        image: DecorationImage(
-          image: FileImage(image),
-          fit: BoxFit.cover,
+      width: 365,
+      height: 365,
+      padding: const EdgeInsets.all(15),
+      margin: const EdgeInsets.symmetric(horizontal: 15),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color.fromARGB(255, 0, 0, 0),
+            Color.fromARGB(255, 71, 71, 71)
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
         ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(15),
+          bottomRight: Radius.circular(15),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.transparent,
+            blurRadius: 2,
+            offset: Offset(2, 2),
+          ),
+        ],
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(10),
+        child: Image.file(image, fit: BoxFit.contain),
       ),
     );
   }
@@ -336,6 +285,79 @@ class _HomeClassState extends State<HomeClass> {
                 fontWeight: FontWeight.w400,
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _tablePickAndOpenCam() {
+    return Container(
+      padding: const EdgeInsets.all(15),
+      margin: const EdgeInsets.symmetric(horizontal: 15),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color.fromARGB(255, 0, 0, 0),
+            Color.fromARGB(255, 71, 71, 71)
+          ], // Blue gradient
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(15),
+          bottomRight: Radius.circular(15),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.transparent,
+            blurRadius: 2,
+            offset: Offset(2, 2),
+          ),
+        ],
+      ),
+      child: Table(
+        columnWidths: const {
+          0: FlexColumnWidth(1),
+          1: FlexColumnWidth(1),
+        },
+        children: [
+          const TableRow(
+            children: [
+              TableCell(
+                child: Row(
+                  mainAxisAlignment:
+                      MainAxisAlignment.center, // Center align content
+                  children: [
+                    Icon(LucideIcons.fileInput,
+                        color: Colors.white, size: 24), // Lucide icon
+                    SizedBox(width: 8), // Space between icon and text
+                    Text(
+                      "Choose the Input",
+                      textAlign: TextAlign.center,
+                      style: TextStyle(
+                        fontSize: 16,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w400,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              SizedBox(),
+            ],
+          ),
+          const TableRow(
+            children: [
+              TableCell(child: SizedBox(height: 16)),
+              TableCell(child: SizedBox()),
+            ],
+          ),
+          TableRow(
+            children: [
+              TableCell(child: Center(child: _pickImage())),
+              TableCell(child: Center(child: _openCam())),
+            ],
           ),
         ],
       ),
