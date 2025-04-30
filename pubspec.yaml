@@ -55,6 +55,7 @@ dependencies:
   image: ^4.5.2
   path_provider: ^2.1.4
   lucide_icons: ^0.257.0
+  tflite_flutter: ^0.11.0
 
 dev_dependencies:
   flutter_test:
@@ -105,6 +106,10 @@ flutter:
     - assets/images/BarApp.png    
     - assets/images/ismael.jpg
     - assets/images/cam.png
+    - assets/flutterModel.tflite
+    - assets/flutterModel_noQuantization.tflite
+  
+
     
   # An image asset can refer to one or more resolution-specific "variants", see
   # https://flutter.dev/assets-and-images/#resolution-aware
