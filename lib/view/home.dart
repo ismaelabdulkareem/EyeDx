@@ -17,22 +17,39 @@ class HomeClass extends StatefulWidget {
 }
 
 class _HomeClassState extends State<HomeClass> {
+  final ScrollController _scrollController = ScrollController();
   final ImagePicker imgPicker = ImagePicker();
   File? imgFile;
   File? processedImgFile;
+  String predictionResult = ''; // Store prediction result
+
+  Future<void> scrollToBottom() async {
+    await Future.delayed(const Duration(milliseconds: 300));
+    _scrollController.animateTo(
+      _scrollController.position.maxScrollExtent,
+      duration: const Duration(milliseconds: 400),
+      curve: Curves.easeOut,
+    );
+  }
 
   Future<void> runInference(List<List<List<List<double>>>> inputImage) async {
     if (_interpreter == null) {
-      _showSnackbar("Model not loaded yet.");
+      if (!mounted) return;
+      setState(() {
+        predictionResult = "Model not loaded yet.";
+      });
+
       return;
     }
 
-    print('Input tensor shape: ${_interpreter!.getInputTensor(0).shape}');
-    print('Input tensor type: ${_interpreter!.getInputTensor(0).type}');
-
     var output = List.generate(1, (_) => List.filled(4, 0.0)); // 4 classes
     _interpreter?.run(inputImage, output);
-    _showSnackbar("Prediction: ${getPredictionLabel(output[0])}");
+    // Get prediction and update state
+    if (!mounted) return;
+    setState(() {
+      predictionResult = getPredictionLabel(output[0]);
+    });
+    await scrollToBottom();
   }
 
   Future<void> choosePic() async {
@@ -45,12 +62,19 @@ class _HomeClassState extends State<HomeClass> {
           processedImgFile =
               null; // Reset processed image when selecting a new image
         });
+        setState(() {
+          predictionResult = "Image selected!";
+        });
       } else {
-        _showSnackbar("No image selected!");
+        if (!mounted) return;
+        setState(() {
+          predictionResult = "No image selected!";
+        });
       }
     } catch (e) {
       debugPrint("Error picking image: $e");
     }
+    await scrollToBottom();
   }
 
   Future<void> openCamera() async {
@@ -64,11 +88,15 @@ class _HomeClassState extends State<HomeClass> {
               null; // Reset processed image when selecting a new image
         });
       } else {
-        _showSnackbar("No image captured!");
+        if (!mounted) return;
+        setState(() {
+          predictionResult = "No image captured!";
+        });
       }
     } catch (e) {
       debugPrint("Error opening camera: $e");
     }
+    await scrollToBottom();
   }
 
   String getPredictionLabel(List<double> output) {
@@ -92,6 +120,10 @@ class _HomeClassState extends State<HomeClass> {
 
     // Format confidence as percentage
     double confidence = (maxValue * 100.0);
+
+    if (confidence < 50.0) {
+      return 'Unknown (Confidence: ${confidence.toStringAsFixed(2)}%)';
+    }
     return '${labels[maxIndex]} (${confidence.toStringAsFixed(2)}%)';
   }
 
@@ -101,10 +133,16 @@ class _HomeClassState extends State<HomeClass> {
     try {
       _interpreter = await tfl.Interpreter.fromAsset(
           'assets/flutterModel_noQuantization.tflite');
-      _showSnackbar("Model loaded successfully.");
+      if (!mounted) return;
+      setState(() {
+        predictionResult = "Model loaded successfully.";
+      });
     } catch (e) {
       debugPrint("Model loading error: $e");
-      _showSnackbar("Failed to load model.");
+      if (!mounted) return;
+      setState(() {
+        predictionResult = "Failed to load model.";
+      });
     }
   }
 
@@ -196,7 +234,10 @@ class _HomeClassState extends State<HomeClass> {
 
   Future<void> preprocessImage() async {
     if (imgFile == null) {
-      _showSnackbar("No image selected!");
+      if (!mounted) return;
+      setState(() {
+        predictionResult = "No image selected!";
+      });
       return;
     }
 
@@ -204,15 +245,6 @@ class _HomeClassState extends State<HomeClass> {
       Uint8List imageBytes = await imgFile!.readAsBytes();
       img.Image croppedImg = await cropFundusCircle(imageBytes);
 
-      // // Convert image to array & normalize
-      // List<List<List<int>>> imgArray = imageToArray(croppedImg);
-      // List<List<List<double>>> normalizedImgArray = imgArray
-      //     .map((row) => row
-      //         .map((pixel) => pixel.map((value) => value / 255.0).toList())
-      //         .toList())
-      //     .toList();
-
-      // Save processed image
       final directory = await getTemporaryDirectory();
       final processedFilePath =
           '${directory.path}/processed_${DateTime.now().millisecondsSinceEpoch}.jpg';
@@ -222,12 +254,18 @@ class _HomeClassState extends State<HomeClass> {
       setState(() {
         processedImgFile = newFile;
       });
-
-      _showSnackbar("Image preprocessing complete!");
+      if (!mounted) return;
+      setState(() {
+        predictionResult = "Image preprocessing complete!";
+      });
     } catch (e) {
       debugPrint("Error processing image: $e");
-      _showSnackbar("Image processing failed!");
+      if (!mounted) return;
+      setState(() {
+        predictionResult = "Image preprocessing failed!";
+      });
     }
+    await scrollToBottom();
   }
 
   void _showSnackbar(String message) {
@@ -239,19 +277,30 @@ class _HomeClassState extends State<HomeClass> {
   Widget build(BuildContext context) {
     return Scaffold(
       body: SingleChildScrollView(
+        controller: _scrollController,
         child: Column(
           children: [
             const SizedBox(height: 50),
             _banner(),
             _tablePickAndOpenCam(),
             _displaySelectedImage(),
-            const SizedBox(height: 20),
 
-            // Preprocessing Button
-            _preprocessBtn(),
+            // Preprocessing and Pridiction Button
+            _tablePreProcessAndPridictBtns(),
 
             const SizedBox(height: 20),
-            _predictBtn(),
+            const Text(
+              "Result",
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Color.fromARGB(255, 1, 54, 199),
+              ),
+            ),
+
+            // Display prediction result below the Predict button
+            _displayPredictionResult(),
+            const SizedBox(height: 100),
           ],
         ),
       ),
@@ -332,7 +381,7 @@ class _HomeClassState extends State<HomeClass> {
     return Container(
       width: 365,
       height: 365,
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.symmetric(horizontal: 15),
       margin: const EdgeInsets.symmetric(horizontal: 15),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -340,13 +389,13 @@ class _HomeClassState extends State<HomeClass> {
             Color.fromARGB(255, 0, 0, 0),
             Color.fromARGB(255, 71, 71, 71)
           ],
-          begin: Alignment.topLeft,
+          begin: Alignment.bottomLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(15),
-          bottomRight: Radius.circular(15),
-        ),
+            // bottomLeft: Radius.circular(15),
+            // bottomRight: Radius.circular(15),
+            ),
         boxShadow: [
           BoxShadow(
             color: Colors.transparent,
@@ -385,7 +434,9 @@ class _HomeClassState extends State<HomeClass> {
         File? imageToUse = processedImgFile ?? imgFile;
 
         if (imageToUse == null) {
-          _showSnackbar("No image selected or processed!");
+          setState(() {
+            predictionResult = "No image selected or processed!";
+          });
           return;
         }
 
@@ -409,9 +460,37 @@ class _HomeClassState extends State<HomeClass> {
     );
   }
 
+  Widget _displayPredictionResult() {
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 10),
+      child: AnimatedSwitcher(
+        duration: const Duration(milliseconds: 800),
+        transitionBuilder: (Widget child, Animation<double> animation) {
+          return SlideTransition(
+            position: Tween<Offset>(
+              begin: const Offset(0.0, 1.0),
+              end: Offset.zero,
+            ).animate(animation),
+            child: child,
+          );
+        },
+        child: Text(
+          predictionResult,
+          key: ValueKey<String>(predictionResult),
+          style: const TextStyle(
+            fontSize: 20,
+            fontWeight: FontWeight.normal,
+            color: Colors.black87,
+          ),
+          textAlign: TextAlign.center,
+        ),
+      ),
+    );
+  }
+
   Widget _banner() {
     return Container(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.only(left: 15, right: 40, top: 15, bottom: 15),
       margin: const EdgeInsets.symmetric(horizontal: 15),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -442,11 +521,11 @@ class _HomeClassState extends State<HomeClass> {
           Expanded(
             child: Text(
               "This app performs multiclass classification of four types of eye diseases: Diabetic retinopathy (DR), Cataract, Glaucoma, and normal fundus.",
-              textAlign: TextAlign.left,
+              textAlign: TextAlign.justify,
               style: TextStyle(
                 fontSize: 16,
                 color: Colors.white,
-                fontWeight: FontWeight.w400,
+                fontWeight: FontWeight.normal,
               ),
             ),
           ),
@@ -468,10 +547,7 @@ class _HomeClassState extends State<HomeClass> {
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.only(
-          bottomLeft: Radius.circular(15),
-          bottomRight: Radius.circular(15),
-        ),
+        borderRadius: BorderRadius.only(),
         boxShadow: [
           BoxShadow(
             color: Colors.transparent,
@@ -523,6 +599,42 @@ class _HomeClassState extends State<HomeClass> {
               TableCell(child: Center(child: _openCam())),
             ],
           ),
+        ],
+      ),
+    );
+  }
+
+  Widget _tablePreProcessAndPridictBtns() {
+    return Container(
+      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+      margin: const EdgeInsets.symmetric(horizontal: 15),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color.fromARGB(255, 0, 0, 0),
+            Color.fromARGB(255, 71, 71, 71),
+          ],
+          begin: Alignment.bottomLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.only(
+          bottomLeft: Radius.circular(15),
+          bottomRight: Radius.circular(15),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.transparent,
+            blurRadius: 2,
+            offset: Offset(2, 2),
+          ),
+        ],
+      ),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.start, // Align items to the start
+        children: [
+          _preprocessBtn(),
+          const SizedBox(width: 15), // Add spacing between buttons
+          _predictBtn(),
         ],
       ),
     );
