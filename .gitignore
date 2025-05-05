@@ -41,3 +41,6 @@ app.*.map.json
 /android/app/debug
 /android/app/profile
 /android/app/release
+
+# Ignore large TFLite model
+assets/flutterModel_noQuantization.tflite
