@@ -1,8 +1,13 @@
 import 'dart:io';
 import 'dart:math';
 import 'package:flutter/material.dart';
+import 'package:get/get.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:omvoting/View/appBar.dart';
+import 'package:omvoting/View/drwaer.dart';
+import 'package:omvoting/ViewModel/fundusViewModel.dart';
+
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
 import 'package:lucide_icons/lucide_icons.dart';
@@ -22,6 +27,7 @@ class _HomeClassState extends State<HomeClass> {
   File? imgFile;
   File? processedImgFile;
   String predictionResult = ''; // Store prediction result
+  final fundusVM = Get.put(fundusViewModel());
 
   Future<void> scrollToBottom() async {
     await Future.delayed(const Duration(milliseconds: 300));
@@ -36,7 +42,7 @@ class _HomeClassState extends State<HomeClass> {
     if (_interpreter == null) {
       if (!mounted) return;
       setState(() {
-        predictionResult = "Model not loaded yet.";
+        predictionResult = "Model not loaded yet";
       });
 
       return;
@@ -135,13 +141,13 @@ class _HomeClassState extends State<HomeClass> {
           'assets/flutterModel_noQuantization.tflite');
       if (!mounted) return;
       setState(() {
-        predictionResult = "Model loaded successfully.";
+        predictionResult = "Model loaded successfully";
       });
     } catch (e) {
       debugPrint("Model loading error: $e");
       if (!mounted) return;
       setState(() {
-        predictionResult = "Failed to load model.";
+        predictionResult = "Failed to load model!";
       });
     }
   }
@@ -276,31 +282,21 @@ class _HomeClassState extends State<HomeClass> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      appBar: const AppBarClass(),
+      drawer: const MyDrawer(),
       body: SingleChildScrollView(
         controller: _scrollController,
         child: Column(
           children: [
-            const SizedBox(height: 50),
+            const SizedBox(height: 2),
             _banner(),
             _tablePickAndOpenCam(),
             _displaySelectedImage(),
-
-            // Preprocessing and Pridiction Button
             _tablePreProcessAndPridictBtns(),
-
-            const SizedBox(height: 20),
-            const Text(
-              "Result",
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Color.fromARGB(255, 1, 54, 199),
-              ),
-            ),
-
-            // Display prediction result below the Predict button
-            _displayPredictionResult(),
+            const SizedBox(height: 2),
+            _FinalResult(),
             const SizedBox(height: 100),
+            _insertButton(),
           ],
         ),
       ),
@@ -462,7 +458,7 @@ class _HomeClassState extends State<HomeClass> {
 
   Widget _displayPredictionResult() {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 10),
+      padding: const EdgeInsets.all(0),
       child: AnimatedSwitcher(
         duration: const Duration(milliseconds: 800),
         transitionBuilder: (Widget child, Animation<double> animation) {
@@ -636,6 +632,103 @@ class _HomeClassState extends State<HomeClass> {
           const SizedBox(width: 15), // Add spacing between buttons
           _predictBtn(),
         ],
+      ),
+    );
+  }
+
+  Widget _FinalResult() {
+    return Container(
+      width: MediaQuery.of(context).size.width * 0.92, // 92% of screen width
+      padding: const EdgeInsets.all(8),
+      decoration: const BoxDecoration(
+        gradient: LinearGradient(
+          colors: [
+            Color(0xFFa8e063),
+            Color(0xFF56ab2f),
+          ],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.all(Radius.circular(12)),
+      ),
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          const Row(
+            mainAxisAlignment: MainAxisAlignment.start, // Center align content
+            children: [
+              SizedBox(width: 8),
+              Icon(LucideIcons.checkSquare,
+                  color: Color.fromARGB(255, 0, 0, 0), size: 24), // Lucide icon
+              SizedBox(width: 8), // Space between icon and text
+              Text(
+                "Result",
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 16,
+                  color: Color.fromARGB(255, 0, 0, 0),
+                  fontWeight: FontWeight.w400,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          _displayPredictionResult(),
+        ],
+      ),
+    );
+  }
+
+  Widget _insertButton() {
+    return InkWell(
+      onTap: () {
+        File? imageToSave = processedImgFile ?? imgFile;
+
+        if (imageToSave == null) {
+          setState(() {
+            predictionResult = "No image selected or processed!";
+          });
+          return;
+        }
+
+        if (imageToSave != null) {
+          fundusVM.addFundus(imageToSave, "A", "A", "a", "a");
+        } else {
+          predictionResult = "Failled to add data !, Please fill up all fields";
+        }
+      },
+      child: Container(
+        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
+        alignment: Alignment.center,
+        height: 55,
+        decoration: BoxDecoration(
+          gradient: const LinearGradient(
+            colors: [
+              Color.fromARGB(255, 226, 225, 228),
+              Color.fromARGB(255, 255, 255, 255),
+            ],
+            begin: Alignment.centerLeft,
+            end: Alignment.centerRight,
+          ),
+          borderRadius: BorderRadius.circular(30),
+          border: Border.all(color: Colors.black), // Black border
+          boxShadow: [
+            BoxShadow(
+              color: const Color.fromARGB(255, 77, 75, 75).withOpacity(0.5),
+              spreadRadius: 0.5,
+              blurRadius: 5,
+              offset: const Offset(0, 1),
+            ),
+          ],
+        ),
+        child: const Text(
+          "Insert information",
+          style: TextStyle(
+            fontSize: 18,
+            fontFamily: 'georgia',
+            color: Color.fromARGB(255, 0, 0, 0),
+          ),
+        ),
       ),
     );
   }
