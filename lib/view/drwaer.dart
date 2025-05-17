@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:get/get.dart';
 import 'package:omvoting/View/history.dart';
 import 'package:omvoting/View/home.dart';
 
@@ -32,10 +34,25 @@ class _MyDrawerState extends State<MyDrawer> {
           children: [
             const SizedBox(height: 60),
             ListTile(
+              leading: const Icon(Icons.refresh_outlined, color: Colors.black),
+              title: const Text('Reload the screen',
+                  style: TextStyle(color: Colors.black)),
+              onTap: () {
+                HapticFeedback.vibrate();
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const HomeClass()),
+                );
+              },
+            ),
+            const Divider(
+                thickness: 0.5, color: Color.fromARGB(66, 61, 61, 61)),
+            ListTile(
               leading: const Icon(Icons.save_outlined, color: Colors.black),
               title: const Text('Save the result',
                   style: TextStyle(color: Colors.black)),
               onTap: () {
+                HapticFeedback.vibrate();
                 Navigator.pop(context);
               },
             ),
@@ -43,9 +60,10 @@ class _MyDrawerState extends State<MyDrawer> {
                 thickness: 0.5, color: Color.fromARGB(66, 61, 61, 61)),
             ListTile(
               leading: const Icon(Icons.history_sharp, color: Colors.black),
-              title:
-                  const Text('History', style: TextStyle(color: Colors.black)),
+              title: const Text('History data',
+                  style: TextStyle(color: Colors.black)),
               onTap: () {
+                HapticFeedback.vibrate();
                 Navigator.push(
                   context,
                   MaterialPageRoute(
@@ -57,12 +75,22 @@ class _MyDrawerState extends State<MyDrawer> {
                 thickness: 0.5, color: Color.fromARGB(66, 61, 61, 61)),
             ListTile(
               leading: const Icon(Icons.home_outlined, color: Colors.black),
-              title: const Text('Home', style: TextStyle(color: Colors.black)),
+              title: const Text('Go back Home',
+                  style: TextStyle(color: Colors.black)),
               onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const HomeClass()),
-                );
+                HapticFeedback.vibrate();
+                navigator?.pop();
+              },
+            ),
+            const Divider(
+                thickness: 0.5, color: Color.fromARGB(66, 61, 61, 61)),
+            ListTile(
+              leading: const Icon(Icons.info_outlined, color: Colors.black),
+              title:
+                  const Text('About us', style: TextStyle(color: Colors.black)),
+              onTap: () {
+                HapticFeedback.vibrate();
+                Navigator.pop(context);
               },
             ),
             const Divider(
@@ -72,6 +100,7 @@ class _MyDrawerState extends State<MyDrawer> {
               title:
                   const Text('Logout', style: TextStyle(color: Colors.black)),
               onTap: () {
+                HapticFeedback.vibrate();
                 Navigator.pop(context);
               },
             ),

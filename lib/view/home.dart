@@ -1,5 +1,12 @@
 import 'dart:io';
-import 'dart:math';
+
+// ignore: depend_on_referenced_packages
+import 'package:flutter/services.dart';
+import 'package:flutter/widgets.dart';
+import 'package:intl/intl.dart';
+import 'package:omvoting/Model/fundusModel.dart';
+
+import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:get/get.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
@@ -27,7 +34,9 @@ class _HomeClassState extends State<HomeClass> {
   File? imgFile;
   File? processedImgFile;
   String predictionResult = ''; // Store prediction result
+  String msgResult = '';
   final fundusVM = Get.put(fundusViewModel());
+  String? selectedCase;
 
   Future<void> scrollToBottom() async {
     await Future.delayed(const Duration(milliseconds: 300));
@@ -38,11 +47,21 @@ class _HomeClassState extends State<HomeClass> {
     );
   }
 
+  Key dropdownKey = UniqueKey(); // Add this in your StatefulWidget class
+
+  void resetDropdown() {
+    setState(() {
+      selectedCase = null;
+      dropdownKey = UniqueKey(); // Force rebuild
+    });
+  }
+
   Future<void> runInference(List<List<List<List<double>>>> inputImage) async {
     if (_interpreter == null) {
       if (!mounted) return;
       setState(() {
-        predictionResult = "Model not loaded yet";
+        predictionResult = '';
+        msgResult = "Model not loaded yet";
       });
 
       return;
@@ -59,35 +78,51 @@ class _HomeClassState extends State<HomeClass> {
   }
 
   Future<void> choosePic() async {
+    HapticFeedback.vibrate();
     try {
       final XFile? image =
           await imgPicker.pickImage(source: ImageSource.gallery);
       if (image != null) {
+        // Delete previous files
+        if (imgFile != null && await imgFile!.exists()) {
+          await imgFile!.delete();
+        }
+        if (processedImgFile != null && await processedImgFile!.exists()) {
+          await processedImgFile!.delete();
+        }
+
         setState(() {
           imgFile = File(image.path);
-          processedImgFile =
-              null; // Reset processed image when selecting a new image
-        });
-        setState(() {
-          predictionResult = "Image selected!";
+          processedImgFile = null;
+          predictionResult = '';
+          msgResult = "Image selected!";
         });
       } else {
         if (!mounted) return;
         setState(() {
-          predictionResult = "No image selected!";
+          predictionResult = '';
+          msgResult = "No image selected!";
         });
       }
     } catch (e) {
       debugPrint("Error picking image: $e");
     }
+    HapticFeedback.vibrate();
     await scrollToBottom();
   }
 
   Future<void> openCamera() async {
+    HapticFeedback.vibrate();
     try {
       final XFile? image =
           await imgPicker.pickImage(source: ImageSource.camera);
       if (image != null) {
+        if (imgFile != null && await imgFile!.exists()) {
+          await imgFile!.delete();
+        }
+        if (processedImgFile != null && await processedImgFile!.exists()) {
+          await processedImgFile!.delete();
+        }
         setState(() {
           imgFile = File(image.path);
           processedImgFile =
@@ -96,12 +131,14 @@ class _HomeClassState extends State<HomeClass> {
       } else {
         if (!mounted) return;
         setState(() {
-          predictionResult = "No image captured!";
+          predictionResult = '';
+          msgResult = "No image captured!";
         });
       }
     } catch (e) {
       debugPrint("Error opening camera: $e");
     }
+    HapticFeedback.vibrate();
     await scrollToBottom();
   }
 
@@ -141,21 +178,35 @@ class _HomeClassState extends State<HomeClass> {
           'assets/flutterModel_noQuantization.tflite');
       if (!mounted) return;
       setState(() {
-        predictionResult = "Model loaded successfully";
+        predictionResult = '';
+        msgResult = "Model loaded successfully";
       });
     } catch (e) {
       debugPrint("Model loading error: $e");
       if (!mounted) return;
       setState(() {
-        predictionResult = "Failed to load model!";
+        predictionResult = '';
+        msgResult = "Failed to load model!";
       });
     }
   }
 
+  final fundusViewModel _viewModel = fundusViewModel();
+  // Class labels
+  final List<String> classLabels = ['NL', 'CA', 'GL', 'DR', 'UNK'];
+
+  late Map<String, int> labelIndex;
+  late List<List<int>> confusionMatrix;
   @override
   void initState() {
     super.initState();
     _loadModel();
+    _viewModel.fetchAllFundus();
+    labelIndex = {
+      for (int i = 0; i < classLabels.length; i++) classLabels[i]: i
+    };
+    confusionMatrix = List.generate(
+        classLabels.length, (_) => List.filled(classLabels.length, 0));
   }
 
   List<List<List<int>>> imageToArray(img.Image image) {
@@ -242,7 +293,8 @@ class _HomeClassState extends State<HomeClass> {
     if (imgFile == null) {
       if (!mounted) return;
       setState(() {
-        predictionResult = "No image selected!";
+        predictionResult = '';
+        msgResult = "No image selected!";
       });
       return;
     }
@@ -262,13 +314,15 @@ class _HomeClassState extends State<HomeClass> {
       });
       if (!mounted) return;
       setState(() {
-        predictionResult = "Image preprocessing complete!";
+        predictionResult = '';
+        msgResult = "Image preprocessing complete!";
       });
     } catch (e) {
       debugPrint("Error processing image: $e");
       if (!mounted) return;
       setState(() {
-        predictionResult = "Image preprocessing failed!";
+        predictionResult = '';
+        msgResult = "Image preprocessing failed!";
       });
     }
     await scrollToBottom();
@@ -280,25 +334,61 @@ class _HomeClassState extends State<HomeClass> {
   }
 
   @override
+  void dispose() {
+    _scrollController.dispose();
+    _interpreter?.close(); // Close TFLite interpreter
+    _clearTempFiles();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: const AppBarClass(),
+      appBar: AppBarClass(
+        onSave: _saveInformation,
+        isSaveEnabled: true,
+      ),
       drawer: const MyDrawer(),
-      body: SingleChildScrollView(
-        controller: _scrollController,
-        child: Column(
-          children: [
-            const SizedBox(height: 2),
-            _banner(),
-            _tablePickAndOpenCam(),
-            _displaySelectedImage(),
-            _tablePreProcessAndPridictBtns(),
-            const SizedBox(height: 2),
-            _FinalResult(),
-            const SizedBox(height: 100),
-            _insertButton(),
-          ],
-        ),
+      body: Stack(
+        fit: StackFit.expand,
+        children: [
+          // Background image with blur effect
+          ImageFiltered(
+            imageFilter: ImageFilter.blur(sigmaX: 4.0, sigmaY: 4.0),
+            child: Image.asset(
+              'assets/images/a2.jpg',
+              fit: BoxFit.cover,
+              width: double.infinity,
+              height: double.infinity,
+            ),
+          ),
+
+          // Optional dark overlay for more readability
+          Container(
+            color: Colors.black.withOpacity(
+                0.1), // You can adjust this for more/less transparency
+          ),
+
+          // Main content (your existing content)
+          SingleChildScrollView(
+            controller: _scrollController,
+            child: Column(
+              children: [
+                const SizedBox(height: 2),
+                _banner(),
+                _tablePickAndOpenCam(),
+                _displaySelectedImage(),
+                _tablePreProcessAndPridictBtns(),
+                const SizedBox(height: 2),
+                _FinalResult(),
+                const SizedBox(height: 2),
+                _tableSaveAndChooseOrginl(),
+                _confusionMatrixPage(),
+                const SizedBox(height: 10),
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -307,26 +397,22 @@ class _HomeClassState extends State<HomeClass> {
     return InkWell(
       onTap: choosePic,
       child: Container(
-        height: 70,
-        width: 70,
+        height: 60,
+        width: 60,
         decoration: const BoxDecoration(
           border: GradientBoxBorder(
             gradient: LinearGradient(
-              colors: [Colors.blue, Color.fromARGB(0, 148, 27, 27)],
+              colors: [Colors.orange, Color.fromARGB(99, 102, 102, 102)],
               begin: Alignment.centerLeft,
               end: Alignment.bottomRight,
             ),
-            width: 5,
-          ),
-          gradient: LinearGradient(
-            colors: [Color.fromARGB(255, 169, 209, 241), Colors.white],
-            begin: Alignment.bottomLeft,
-            end: Alignment.centerLeft,
+            width: 2,
           ),
           shape: BoxShape.circle,
+          color: Colors.white,
           image: DecorationImage(
-            image: AssetImage('assets/images/partyApp2.png'),
-            fit: BoxFit.cover,
+            image: AssetImage('assets/images/eyeball.png'),
+            fit: BoxFit.contain,
           ),
         ),
       ),
@@ -337,27 +423,22 @@ class _HomeClassState extends State<HomeClass> {
     return InkWell(
       onTap: openCamera,
       child: Container(
-        height: 70,
-        width: 70,
+        height: 60,
+        width: 60,
         decoration: const BoxDecoration(
           border: GradientBoxBorder(
             gradient: LinearGradient(
-              colors: [Colors.blue, Colors.transparent],
+              colors: [Colors.orange, Color.fromARGB(99, 102, 102, 102)],
               begin: Alignment.centerLeft,
               end: Alignment.bottomRight,
             ),
-            width: 5,
-          ),
-          gradient: LinearGradient(
-            colors: [Color.fromARGB(255, 169, 209, 241), Colors.white],
-            begin: Alignment.bottomLeft,
-            end: Alignment.centerLeft,
+            width: 2,
           ),
           shape: BoxShape.circle,
           image: DecorationImage(
-            image: AssetImage('assets/images/cam.png'),
-            fit: BoxFit.contain,
-            scale: 1.5,
+            image: AssetImage('assets/images/cam.jpg'),
+            fit: BoxFit.cover,
+            //scale: 1.5,
             alignment: Alignment.center,
           ),
         ),
@@ -409,29 +490,53 @@ class _HomeClassState extends State<HomeClass> {
 
   Widget _preprocessBtn() {
     return ElevatedButton(
-      style: OutlinedButton.styleFrom(
-        backgroundColor: Colors.orangeAccent,
-        foregroundColor: const Color.fromARGB(255, 255, 255, 255),
+      style: ElevatedButton.styleFrom(
+        foregroundColor: Colors.white,
+        backgroundColor: Colors.transparent,
+        side: const BorderSide(
+            color: Color.fromARGB(255, 255, 171, 64), width: 1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(25),
+        ),
       ),
-      onPressed: preprocessImage,
-      child: const Text('Preprocess Image'),
+      onPressed: () {
+        preprocessImage();
+        HapticFeedback.vibrate();
+      },
+      child: const Text(
+        'Preprocess Image',
+        style: TextStyle(
+          fontFamily: 'georgia',
+        ),
+      ),
     );
   }
 
   Widget _predictBtn() {
     return ElevatedButton(
-      style: OutlinedButton.styleFrom(
-        backgroundColor: Colors.blue,
+      style: ElevatedButton.styleFrom(
         foregroundColor: Colors.white,
+        backgroundColor: const Color.fromARGB(0, 0, 0, 0),
+        side: const BorderSide(
+            color: Color.fromARGB(255, 64, 169, 255), width: 1),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(25),
+        ),
       ),
-      child: const Text('Predict'),
+      child: const Text(
+        'Predict',
+        style: TextStyle(
+          fontFamily: 'georgia',
+        ),
+      ),
       onPressed: () async {
-        // Use processed image if available, else original image
+        HapticFeedback.vibrate();
         File? imageToUse = processedImgFile ?? imgFile;
 
         if (imageToUse == null) {
           setState(() {
-            predictionResult = "No image selected or processed!";
+            predictionResult = '';
+            msgResult = "No image selected or processed!";
           });
           return;
         }
@@ -457,6 +562,10 @@ class _HomeClassState extends State<HomeClass> {
   }
 
   Widget _displayPredictionResult() {
+    // Prioritize prediction result if available, else show msgResult
+    String displayMessage =
+        predictionResult.isNotEmpty ? predictionResult : msgResult;
+
     return Padding(
       padding: const EdgeInsets.all(0),
       child: AnimatedSwitcher(
@@ -471,11 +580,12 @@ class _HomeClassState extends State<HomeClass> {
           );
         },
         child: Text(
-          predictionResult,
-          key: ValueKey<String>(predictionResult),
+          displayMessage,
+          key: ValueKey<String>(displayMessage),
           style: const TextStyle(
             fontSize: 20,
             fontWeight: FontWeight.normal,
+            fontFamily: 'georgia',
             color: Colors.black87,
           ),
           textAlign: TextAlign.center,
@@ -486,13 +596,13 @@ class _HomeClassState extends State<HomeClass> {
 
   Widget _banner() {
     return Container(
-      padding: const EdgeInsets.only(left: 15, right: 40, top: 15, bottom: 15),
+      padding: const EdgeInsets.only(left: 15, right: 40, top: 10, bottom: 10),
       margin: const EdgeInsets.symmetric(horizontal: 15),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Color.fromARGB(255, 243, 33, 79),
-            Color.fromARGB(255, 248, 98, 98)
+            Color.fromARGB(150, 255, 152, 0),
+            Color.fromARGB(150, 238, 241, 12)
           ], // Blue gradient
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -509,18 +619,23 @@ class _HomeClassState extends State<HomeClass> {
           ),
         ],
       ),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(LucideIcons.activity, color: Colors.white, size: 32), // Eye icon
-          SizedBox(width: 12),
-          Expanded(
+          Image.asset(
+            'assets/images/thisapplication.png',
+            width: 32,
+            height: 32,
+          ),
+          const SizedBox(width: 12),
+          const Expanded(
             child: Text(
-              "This app performs multiclass classification of four types of eye diseases: Diabetic retinopathy (DR), Cataract, Glaucoma, and normal fundus.",
+              "This application performs multiclass classification of four types of eye diseases: Diabetic retinopathy (DR), Cataract, Glaucoma, and normal fundus.",
               textAlign: TextAlign.justify,
               style: TextStyle(
-                fontSize: 16,
-                color: Colors.white,
+                fontSize: 14,
+                fontFamily: 'georgia',
+                color: Color.fromARGB(255, 0, 0, 0),
                 fontWeight: FontWeight.normal,
               ),
             ),
@@ -532,13 +647,13 @@ class _HomeClassState extends State<HomeClass> {
 
   Widget _tablePickAndOpenCam() {
     return Container(
-      padding: const EdgeInsets.all(15),
+      padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
       margin: const EdgeInsets.symmetric(horizontal: 15),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Color.fromARGB(255, 0, 0, 0),
-            Color.fromARGB(255, 71, 71, 71)
+            Color.fromARGB(240, 0, 0, 0),
+            Color.fromARGB(240, 71, 71, 71)
           ], // Blue gradient
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -558,34 +673,38 @@ class _HomeClassState extends State<HomeClass> {
           1: FlexColumnWidth(1),
         },
         children: [
-          const TableRow(
+          TableRow(
             children: [
               TableCell(
                 child: Row(
                   mainAxisAlignment:
-                      MainAxisAlignment.center, // Center align content
+                      MainAxisAlignment.start, // Center align content
                   children: [
-                    Icon(LucideIcons.fileInput,
-                        color: Colors.white, size: 24), // Lucide icon
-                    SizedBox(width: 8), // Space between icon and text
-                    Text(
+                    Image.asset(
+                      'assets/images/input.png',
+                      width: 25,
+                      height: 25,
+                      color: Colors.white,
+                    ),
+                    const SizedBox(width: 8), // Space between icon and text
+                    const Text(
                       "Choose the Input",
                       textAlign: TextAlign.center,
                       style: TextStyle(
-                        fontSize: 16,
+                        fontSize: 14,
+                        fontFamily: 'georgia',
                         color: Colors.white,
-                        fontWeight: FontWeight.w400,
                       ),
                     ),
                   ],
                 ),
               ),
-              SizedBox(),
+              const SizedBox(),
             ],
           ),
           const TableRow(
             children: [
-              TableCell(child: SizedBox(height: 16)),
+              TableCell(child: SizedBox(height: 10)),
               TableCell(child: SizedBox()),
             ],
           ),
@@ -595,6 +714,34 @@ class _HomeClassState extends State<HomeClass> {
               TableCell(child: Center(child: _openCam())),
             ],
           ),
+          const TableRow(
+            children: [
+              TableCell(child: SizedBox(height: 3)),
+              TableCell(child: SizedBox()),
+            ],
+          ),
+          const TableRow(
+            children: [
+              TableCell(
+                  child: Center(
+                      child: Text(
+                "Fundus",
+                style: TextStyle(
+                    color: Color.fromARGB(221, 255, 255, 255),
+                    fontFamily: 'georgia',
+                    fontSize: 10),
+              ))),
+              TableCell(
+                  child: Center(
+                      child: Text(
+                "Lens",
+                style: TextStyle(
+                    color: Color.fromARGB(221, 255, 255, 255),
+                    fontFamily: 'georgia',
+                    fontSize: 10),
+              ))),
+            ],
+          ),
         ],
       ),
     );
@@ -602,15 +749,15 @@ class _HomeClassState extends State<HomeClass> {
 
   Widget _tablePreProcessAndPridictBtns() {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 15, horizontal: 15),
+      padding: const EdgeInsets.symmetric(vertical: 9, horizontal: 15),
       margin: const EdgeInsets.symmetric(horizontal: 15),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Color.fromARGB(255, 0, 0, 0),
-            Color.fromARGB(255, 71, 71, 71),
-          ],
-          begin: Alignment.bottomLeft,
+            Color.fromARGB(240, 0, 0, 0),
+            Color.fromARGB(240, 71, 71, 71)
+          ], // Blue gradient
+          begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
         borderRadius: BorderRadius.only(
@@ -643,8 +790,8 @@ class _HomeClassState extends State<HomeClass> {
       decoration: const BoxDecoration(
         gradient: LinearGradient(
           colors: [
-            Color(0xFFa8e063),
-            Color(0xFF56ab2f),
+            Color.fromARGB(200, 168, 224, 99),
+            Color.fromARGB(200, 86, 171, 47),
           ],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -654,18 +801,24 @@ class _HomeClassState extends State<HomeClass> {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          const Row(
-            mainAxisAlignment: MainAxisAlignment.start, // Center align content
+          Row(
+            mainAxisAlignment: MainAxisAlignment.start,
             children: [
-              SizedBox(width: 8),
-              Icon(LucideIcons.checkSquare,
-                  color: Color.fromARGB(255, 0, 0, 0), size: 24), // Lucide icon
-              SizedBox(width: 8), // Space between icon and text
-              Text(
+              const SizedBox(width: 8),
+              Image.asset(
+                'assets/images/predict.png',
+                width: 30,
+                height: 30,
+                color: Colors
+                    .black, // optional if your image is monochrome and you want to tint it
+              ),
+              const SizedBox(width: 8), // Space between icon and text
+              const Text(
                 "Result",
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 16,
+                  fontFamily: 'georgia',
                   color: Color.fromARGB(255, 0, 0, 0),
                   fontWeight: FontWeight.w400,
                 ),
@@ -679,57 +832,426 @@ class _HomeClassState extends State<HomeClass> {
     );
   }
 
-  Widget _insertButton() {
-    return InkWell(
-      onTap: () {
-        File? imageToSave = processedImgFile ?? imgFile;
+  void _saveInformation() async {
+    try {
+      File? imageToSave = processedImgFile ?? imgFile;
+      String formattedDate =
+          DateFormat('MMM d yyyy, hh:mm:ss a').format(DateTime.now());
 
-        if (imageToSave == null) {
-          setState(() {
-            predictionResult = "No image selected or processed!";
-          });
-          return;
-        }
+      String caseTypeToSave = selectedCase ??
+          "Unknown"; // Default to "Unknown" if nothing is selected
 
-        if (imageToSave != null) {
-          fundusVM.addFundus(imageToSave, "A", "A", "a", "a");
-        } else {
-          predictionResult = "Failled to add data !, Please fill up all fields";
-        }
-      },
-      child: Container(
-        margin: const EdgeInsets.symmetric(vertical: 10, horizontal: 40),
-        alignment: Alignment.center,
-        height: 55,
-        decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            colors: [
-              Color.fromARGB(255, 226, 225, 228),
-              Color.fromARGB(255, 255, 255, 255),
+      if (imageToSave == null || !imageToSave.existsSync()) {
+        setState(() {
+          predictionResult = '';
+          msgResult = "No image to save!";
+        });
+        return;
+      }
+
+      if (predictionResult != '') {
+        fundusVM.addFundus(
+          imageToSave,
+          formattedDate,
+          caseTypeToSave,
+          predictionResult,
+        );
+      } else {
+        setState(() {
+          msgResult = "No pridiction";
+        });
+        return;
+      }
+      setState(() {
+        predictionResult = '';
+        msgResult = "Information saved to Firebase successfully!";
+        selectedCase = null;
+      });
+    } catch (e) {
+      setState(() {
+        predictionResult = '';
+
+        msgResult = "Error saving to Firebase: $e";
+      });
+    }
+    await scrollToBottom();
+  }
+
+  Future<void> _clearTempFiles() async {
+    try {
+      if (imgFile != null && await imgFile!.exists()) {
+        await imgFile!.delete();
+      }
+      if (processedImgFile != null && await processedImgFile!.exists()) {
+        await processedImgFile!.delete();
+      }
+    } catch (e) {
+      debugPrint("Failed to delete temp files: $e");
+    }
+  }
+
+  Widget _tableSaveAndChooseOrginl() {
+    List<String> caseTypes = [
+      "Unknown",
+      "Normal",
+      "Cataract",
+      "Glaucoma",
+      "DR",
+    ];
+
+    return StatefulBuilder(
+      builder: (context, setState) {
+        return Container(
+          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
+          margin: const EdgeInsets.symmetric(horizontal: 15),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.start,
+            children: [
+              DropdownMenu<String>(
+                key: dropdownKey,
+                hintText: "True Label",
+                initialSelection: selectedCase,
+                dropdownMenuEntries: caseTypes.map((caseType) {
+                  return DropdownMenuEntry(value: caseType, label: caseType);
+                }).toList(),
+                trailingIcon: const Icon(
+                  Icons.arrow_drop_down_circle, // Change to your desired icon
+                  color: Colors.orange,
+                ),
+                leadingIcon: const Icon(
+                  Icons.check_outlined, // Change to your desired icon
+                  color: Color.fromARGB(99, 170, 243, 122),
+                ),
+                selectedTrailingIcon: const Icon(
+                  Icons
+                      .arrow_back_ios_new_outlined, // Change to your desired icon
+                  color: Colors.orange,
+                ),
+                onSelected: (newValue) {
+                  HapticFeedback.vibrate();
+                  setState(() {
+                    selectedCase = newValue;
+                  });
+                },
+                menuStyle: MenuStyle(
+                  alignment: Alignment.bottomLeft,
+                  backgroundColor: MaterialStateProperty.all(
+                      const Color.fromARGB(240, 255, 255, 255)),
+                  shape: MaterialStateProperty.all(
+                    RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(10),
+                    ),
+                  ),
+                ),
+                inputDecorationTheme: InputDecorationTheme(
+                  isDense: true,
+                  contentPadding: const EdgeInsets.symmetric(horizontal: 25),
+                  constraints: BoxConstraints.tight(const Size.fromHeight(40)),
+                  border: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(
+                      color: Colors.orange,
+                      width: 1,
+                    ),
+                  ),
+                  enabledBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(
+                      color: Colors.orange,
+                      width: 1,
+                    ),
+                  ),
+                  focusedBorder: OutlineInputBorder(
+                    borderRadius: BorderRadius.circular(30),
+                    borderSide: const BorderSide(
+                      color: Color.fromARGB(255, 238, 209, 45),
+                      width: 2.5,
+                    ),
+                  ),
+                  hintStyle: const TextStyle(
+                    color: Colors.white,
+                    fontFamily: 'georgia',
+                    fontWeight: FontWeight.normal,
+                  ),
+                ),
+                textStyle: const TextStyle(
+                  color: Colors.orange,
+                  fontFamily: 'georgia',
+                  fontWeight: FontWeight.normal,
+                  fontSize: 14,
+                ),
+              ),
+
+              const SizedBox(width: 15),
+
+              // Save button
+              ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.white,
+                  backgroundColor: Colors.transparent,
+                  side: const BorderSide(color: Colors.orange, width: 1),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(25),
+                  ),
+                ),
+                onPressed: () {
+                  HapticFeedback.vibrate();
+                  _saveInformation(); // your custom save function
+                  setState(() {
+                    resetDropdown(); // This resets the dropdown
+                  });
+                },
+                child: const Text(
+                  'Save',
+                  style: TextStyle(
+                    fontFamily: 'georgia',
+                  ),
+                ),
+              ),
             ],
-            begin: Alignment.centerLeft,
-            end: Alignment.centerRight,
           ),
-          borderRadius: BorderRadius.circular(30),
-          border: Border.all(color: Colors.black), // Black border
-          boxShadow: [
-            BoxShadow(
-              color: const Color.fromARGB(255, 77, 75, 75).withOpacity(0.5),
-              spreadRadius: 0.5,
-              blurRadius: 5,
-              offset: const Offset(0, 1),
-            ),
-          ],
-        ),
-        child: const Text(
-          "Insert information",
-          style: TextStyle(
-            fontSize: 18,
-            fontFamily: 'georgia',
-            color: Color.fromARGB(255, 0, 0, 0),
+        );
+      },
+    );
+  }
+
+  int getTotalSamples(List<List<int>> matrix) {
+    return matrix.fold(0, (sum, row) => sum + row.reduce((a, b) => a + b));
+  }
+
+  Widget buildConfusionMatrixTable() {
+    final int totalSamples = getTotalSamples(confusionMatrix);
+    return SingleChildScrollView(
+      scrollDirection: Axis.vertical,
+      child: Center(
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: 600),
+          child: Column(
+            crossAxisAlignment:
+                CrossAxisAlignment.center, // Aligns text to the left
+            children: [
+              Padding(
+                padding:
+                    const EdgeInsets.only(bottom: 12.0, left: 12, right: 10),
+                child: Text(
+                  'This Tabel is showing the true labels (TL) and predicted labels (PL) for all samples recently assessed by the program (total samples: $totalSamples).',
+                  textAlign: TextAlign.justify,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontFamily: 'georgia',
+                    fontWeight: FontWeight.normal,
+                    color: Colors.white,
+                  ),
+                ),
+              ),
+              Table(
+                border: TableBorder.all(color: Colors.orangeAccent),
+                columnWidths: const {
+                  0: FixedColumnWidth(65),
+                },
+                defaultColumnWidth: const FixedColumnWidth(55),
+                children: [
+                  // Header row
+                  TableRow(
+                    children: [
+                      Container(
+                        color: const Color.fromARGB(150, 100, 129, 143),
+                        alignment: Alignment.center,
+                        padding: const EdgeInsets.symmetric(
+                            horizontal: 6.0, vertical: 8),
+                        child: const Text(
+                          'TL / PL',
+                          style: TextStyle(
+                            fontWeight: FontWeight.normal,
+                            fontFamily: 'georgia',
+                            color: Colors.white,
+                          ),
+                          textAlign: TextAlign.center,
+                        ),
+                      ),
+                      ...classLabels.map((label) => Container(
+                            color: const Color.fromARGB(150, 96, 125, 139),
+                            padding: const EdgeInsets.all(8.0),
+                            child: Center(
+                              child: Text(
+                                label,
+                                style: const TextStyle(
+                                  fontWeight: FontWeight.normal,
+                                  fontFamily: 'georgia',
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                          )),
+                    ],
+                  ),
+                  // Data rows
+                  for (int i = 0; i < classLabels.length; i++)
+                    TableRow(
+                      children: [
+                        Container(
+                          color: const Color.fromARGB(150, 105, 105, 105),
+                          alignment: Alignment.center,
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 6.0, vertical: 13),
+                          child: Text(
+                            classLabels[i],
+                            style: const TextStyle(
+                              fontWeight: FontWeight.normal,
+                              fontFamily: 'georgia',
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                        ),
+                        for (int j = 0; j < classLabels.length; j++)
+                          Builder(builder: (_) {
+                            final rowTotal =
+                                confusionMatrix[i].reduce((a, b) => a + b);
+                            final value = confusionMatrix[i][j];
+                            final percentage =
+                                rowTotal > 0 ? value / rowTotal : 0.0;
+                            final percentText =
+                                (percentage * 100).toStringAsFixed(0);
+
+                            const baseColor = Color.fromARGB(200, 30, 140, 250);
+                            final backgroundColor = Color.lerp(
+                                const Color.fromARGB(150, 0, 0, 20),
+                                baseColor,
+                                percentage + 0.1);
+
+                            return AnimatedContainer(
+                              duration: const Duration(milliseconds: 500),
+                              padding: const EdgeInsets.all(6.0),
+                              color: backgroundColor,
+                              child: Center(
+                                child: Column(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    AnimatedSwitcher(
+                                      duration:
+                                          const Duration(milliseconds: 800),
+                                      transitionBuilder: (Widget child,
+                                          Animation<double> animation) {
+                                        return SlideTransition(
+                                          position: Tween<Offset>(
+                                            begin: const Offset(0.0, 1.0),
+                                            end: Offset.zero,
+                                          ).animate(animation),
+                                          child: child,
+                                        );
+                                      },
+                                      child: Text(
+                                        value.toString(),
+                                        key: ValueKey(
+                                            value), // Important for change detection
+                                        style: const TextStyle(
+                                          fontFamily: 'georgia',
+                                          fontWeight: FontWeight.normal,
+                                          color: Colors.white,
+                                        ),
+                                      ),
+                                    ),
+                                    AnimatedSwitcher(
+                                      duration:
+                                          const Duration(milliseconds: 1000),
+                                      transitionBuilder: (Widget child,
+                                          Animation<double> animation) {
+                                        return SlideTransition(
+                                          position: Tween<Offset>(
+                                            begin: const Offset(0.0, 1.0),
+                                            end: Offset.zero,
+                                          ).animate(animation),
+                                          child: child,
+                                        );
+                                      },
+                                      child: Text(
+                                        '($percentText%)',
+                                        key: ValueKey(
+                                            percentText), // Important for change detection
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          fontFamily: 'georgia',
+                                          color: Colors.white70,
+                                        ),
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            );
+                          }),
+                      ],
+                    ),
+                ],
+              ),
+            ],
           ),
         ),
       ),
+    );
+  }
+
+  String normalizeLabel(String rawLabel) {
+    rawLabel = rawLabel.toLowerCase();
+
+    if (rawLabel.contains('normal')) return 'NL';
+    if (rawLabel.contains('cataract')) return 'CA';
+    if (rawLabel.contains('glaucoma')) return 'GL';
+    if (rawLabel.contains('diabetic') || rawLabel.contains('dr')) return 'DR';
+    if (rawLabel.contains('unknown')) return 'UNK';
+
+    return rawLabel; // fallback to original if unmatched
+  }
+
+  Widget _confusionMatrixPage() {
+    return StreamBuilder<List<fundus_Model>>(
+      stream: _viewModel.allFundusList.stream,
+      builder: (context, snapshot) {
+        if (_viewModel.isLoading.value &&
+            snapshot.connectionState == ConnectionState.waiting) {
+          return const Center(child: CircularProgressIndicator());
+        }
+
+        if (snapshot.hasError) {
+          return Center(child: Text('Error: ${snapshot.error}'));
+        }
+
+        final List<fundus_Model>? fundusList = snapshot.data;
+
+        if (fundusList == null || fundusList.isEmpty) {
+          return const Center(
+              child: Text(
+            'No fundus data available!',
+            style: TextStyle(
+              fontFamily: 'georgia',
+            ),
+          ));
+        }
+
+        // Reset confusion matrix on each data update
+        confusionMatrix = List.generate(
+            classLabels.length, (_) => List.filled(classLabels.length, 0));
+
+        // Process fundus data to update the confusion matrix
+        for (var fu in fundusList) {
+          final actual = normalizeLabel(fu.orginal);
+          final predicted = normalizeLabel(fu.result);
+
+          if (labelIndex.containsKey(actual) &&
+              labelIndex.containsKey(predicted)) {
+            final i = labelIndex[actual]!;
+            final j = labelIndex[predicted]!;
+
+            confusionMatrix[i][j]++;
+          }
+        }
+
+        return Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: buildConfusionMatrixTable(),
+        );
+      },
     );
   }
 }
