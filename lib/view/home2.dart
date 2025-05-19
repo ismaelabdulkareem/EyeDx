@@ -1,39 +1,31 @@
 import 'dart:io';
-
 // ignore: depend_on_referenced_packages
 import 'package:flutter/services.dart';
 // ignore: depend_on_referenced_packages
-import 'package:intl/intl.dart';
-import 'package:omvoting/Model/fundusModel.dart';
-import 'package:http/http.dart' as http;
 import 'dart:ui';
 import 'package:flutter/material.dart';
-import 'package:get/get.dart';
 import 'package:gradient_borders/box_borders/gradient_box_border.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:omvoting/View/appBar.dart';
 import 'package:omvoting/View/drwaer.dart';
-import 'package:omvoting/ViewModel/fundusViewModel.dart';
 import 'package:path_provider/path_provider.dart';
 import 'package:image/image.dart' as img;
+import 'package:http/http.dart' as http;
 import 'package:tflite_flutter/tflite_flutter.dart' as tfl;
 
-class HomeClass extends StatefulWidget {
-  const HomeClass({super.key});
+class HomeClass2 extends StatefulWidget {
+  const HomeClass2({super.key});
 
   @override
-  State<HomeClass> createState() => _HomeClassState();
+  State<HomeClass2> createState() => _HomeClassState2();
 }
 
-class _HomeClassState extends State<HomeClass> {
-  final ScrollController _scrollController = ScrollController();
+class _HomeClassState2 extends State<HomeClass2> {
   final ImagePicker imgPicker = ImagePicker();
   File? imgFile;
   File? processedImgFile;
   String predictionResult = ''; // Store prediction result
   String msgResult = '';
-  final fundusVM = Get.put(fundusViewModel());
-  String? selectedCase;
 
   Future<img.Image?> cropAndPreprocessServer(File file,
       {int targetSize = 224}) async {
@@ -60,24 +52,6 @@ class _HomeClassState extends State<HomeClass> {
     return null;
   }
 
-  Future<void> scrollToBottom() async {
-    await Future.delayed(const Duration(milliseconds: 300));
-    _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent,
-      duration: const Duration(milliseconds: 400),
-      curve: Curves.easeOut,
-    );
-  }
-
-  Key dropdownKey = UniqueKey(); // Add this in your StatefulWidget class
-
-  void resetDropdown() {
-    setState(() {
-      selectedCase = null;
-      dropdownKey = UniqueKey(); // Force rebuild
-    });
-  }
-
   Future<void> runInference(List<List<List<List<double>>>> inputImage) async {
     if (_interpreter == null) {
       if (!mounted) return;
@@ -85,7 +59,6 @@ class _HomeClassState extends State<HomeClass> {
         predictionResult = '';
         msgResult = "Model not loaded yet";
       });
-
       return;
     }
 
@@ -96,7 +69,6 @@ class _HomeClassState extends State<HomeClass> {
     setState(() {
       predictionResult = getPredictionLabel(output[0]);
     });
-    await scrollToBottom();
   }
 
   Future<void> choosePic() async {
@@ -130,7 +102,6 @@ class _HomeClassState extends State<HomeClass> {
       debugPrint("Error picking image: $e");
     }
     HapticFeedback.vibrate();
-    await scrollToBottom();
   }
 
   Future<void> openCamera() async {
@@ -161,7 +132,6 @@ class _HomeClassState extends State<HomeClass> {
       debugPrint("Error opening camera: $e");
     }
     HapticFeedback.vibrate();
-    await scrollToBottom();
   }
 
   String getPredictionLabel(List<double> output) {
@@ -213,22 +183,12 @@ class _HomeClassState extends State<HomeClass> {
     }
   }
 
-  final fundusViewModel _viewModel = fundusViewModel();
-  // Class labels
-  final List<String> classLabels = ['NL', 'CA', 'GL', 'DR', 'UNK'];
-
   late Map<String, int> labelIndex;
   late List<List<int>> confusionMatrix;
   @override
   void initState() {
     super.initState();
     _loadModel();
-    _viewModel.fetchAllFundus();
-    labelIndex = {
-      for (int i = 0; i < classLabels.length; i++) classLabels[i]: i
-    };
-    confusionMatrix = List.generate(
-        classLabels.length, (_) => List.filled(classLabels.length, 0));
   }
 
   List<List<List<int>>> imageToArray(img.Image image) {
@@ -317,17 +277,15 @@ class _HomeClassState extends State<HomeClass> {
 
   @override
   void dispose() {
-    _scrollController.dispose();
     _interpreter?.close(); // Close TFLite interpreter
-    _clearTempFiles();
+
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBarClass(
-        onSave: _saveInformation,
+      appBar: const AppBarClass(
         isSaveEnabled: true,
       ),
       drawer: const MyDrawer(),
@@ -353,20 +311,14 @@ class _HomeClassState extends State<HomeClass> {
 
           // Main content (your existing content)
           SingleChildScrollView(
-            controller: _scrollController,
             child: Column(
               children: [
                 const SizedBox(height: 2),
-                _banner(),
                 _tablePickAndOpenCam(),
                 _displaySelectedImage(),
                 _tablePreProcessAndPridictBtns(),
                 const SizedBox(height: 2),
                 _FinalResult(),
-                const SizedBox(height: 2),
-                _tableSaveAndChooseOrginl(),
-                _confusionMatrixPage(),
-                const SizedBox(height: 10),
               ],
             ),
           ),
@@ -576,57 +528,6 @@ class _HomeClassState extends State<HomeClass> {
     );
   }
 
-  Widget _banner() {
-    return Container(
-      padding: const EdgeInsets.only(left: 15, right: 40, top: 10, bottom: 10),
-      margin: const EdgeInsets.symmetric(horizontal: 15),
-      decoration: const BoxDecoration(
-        gradient: LinearGradient(
-          colors: [
-            Color.fromARGB(150, 255, 152, 0),
-            Color.fromARGB(150, 238, 241, 12)
-          ], // Blue gradient
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-        ),
-        borderRadius: BorderRadius.only(
-          topLeft: Radius.circular(15),
-          topRight: Radius.circular(15),
-        ),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.transparent,
-            blurRadius: 2,
-            offset: Offset(2, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Image.asset(
-            'assets/images/thisapplication.png',
-            width: 32,
-            height: 32,
-          ),
-          const SizedBox(width: 12),
-          const Expanded(
-            child: Text(
-              "This application performs multiclass classification of four types of eye diseases: Diabetic retinopathy (DR), Cataract, Glaucoma, and normal fundus.",
-              textAlign: TextAlign.justify,
-              style: TextStyle(
-                fontSize: 14,
-                fontFamily: 'georgia',
-                color: Color.fromARGB(255, 0, 0, 0),
-                fontWeight: FontWeight.normal,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   Widget _tablePickAndOpenCam() {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 10),
@@ -811,429 +712,6 @@ class _HomeClassState extends State<HomeClass> {
           _displayPredictionResult(),
         ],
       ),
-    );
-  }
-
-  void _saveInformation() async {
-    try {
-      File? imageToSave = processedImgFile ?? imgFile;
-      String formattedDate =
-          DateFormat('MMM d yyyy, hh:mm:ss a').format(DateTime.now());
-
-      String caseTypeToSave = selectedCase ??
-          "Unknown"; // Default to "Unknown" if nothing is selected
-
-      if (imageToSave == null || !imageToSave.existsSync()) {
-        setState(() {
-          predictionResult = '';
-          msgResult = "No image to save!";
-        });
-        return;
-      }
-
-      if (predictionResult != '') {
-        fundusVM.addFundus(
-          imageToSave,
-          formattedDate,
-          caseTypeToSave,
-          predictionResult,
-        );
-      } else {
-        setState(() {
-          msgResult = "No pridiction";
-        });
-        return;
-      }
-      setState(() {
-        predictionResult = '';
-        msgResult = "Information saved to Firebase successfully!";
-        selectedCase = null;
-      });
-    } catch (e) {
-      setState(() {
-        predictionResult = '';
-
-        msgResult = "Error saving to Firebase: $e";
-      });
-    }
-    await scrollToBottom();
-  }
-
-  Future<void> _clearTempFiles() async {
-    try {
-      if (imgFile != null && await imgFile!.exists()) {
-        await imgFile!.delete();
-      }
-      if (processedImgFile != null && await processedImgFile!.exists()) {
-        await processedImgFile!.delete();
-      }
-    } catch (e) {
-      debugPrint("Failed to delete temp files: $e");
-    }
-  }
-
-  Widget _tableSaveAndChooseOrginl() {
-    List<String> caseTypes = [
-      "Unknown",
-      "Normal",
-      "Cataract",
-      "Glaucoma",
-      "DR",
-    ];
-
-    return StatefulBuilder(
-      builder: (context, setState) {
-        return Container(
-          padding: const EdgeInsets.symmetric(vertical: 10, horizontal: 15),
-          margin: const EdgeInsets.symmetric(horizontal: 15),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              DropdownMenu<String>(
-                key: dropdownKey,
-                hintText: "True Label",
-                initialSelection: selectedCase,
-                dropdownMenuEntries: caseTypes.map((caseType) {
-                  return DropdownMenuEntry(value: caseType, label: caseType);
-                }).toList(),
-                trailingIcon: const Icon(
-                  Icons.arrow_drop_down_circle, // Change to your desired icon
-                  color: Colors.orange,
-                ),
-                leadingIcon: const Icon(
-                  Icons.check_outlined, // Change to your desired icon
-                  color: Color.fromARGB(99, 170, 243, 122),
-                ),
-                selectedTrailingIcon: const Icon(
-                  Icons
-                      .arrow_back_ios_new_outlined, // Change to your desired icon
-                  color: Colors.orange,
-                ),
-                onSelected: (newValue) {
-                  HapticFeedback.vibrate();
-                  setState(() {
-                    selectedCase = newValue;
-                  });
-                },
-                menuStyle: MenuStyle(
-                  alignment: Alignment.bottomLeft,
-                  backgroundColor: MaterialStateProperty.all(
-                      const Color.fromARGB(240, 255, 255, 255)),
-                  shape: MaterialStateProperty.all(
-                    RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(10),
-                    ),
-                  ),
-                ),
-                inputDecorationTheme: InputDecorationTheme(
-                  isDense: true,
-                  contentPadding: const EdgeInsets.symmetric(horizontal: 25),
-                  constraints: BoxConstraints.tight(const Size.fromHeight(40)),
-                  border: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: const BorderSide(
-                      color: Colors.orange,
-                      width: 1,
-                    ),
-                  ),
-                  enabledBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: const BorderSide(
-                      color: Colors.orange,
-                      width: 1,
-                    ),
-                  ),
-                  focusedBorder: OutlineInputBorder(
-                    borderRadius: BorderRadius.circular(30),
-                    borderSide: const BorderSide(
-                      color: Color.fromARGB(255, 238, 209, 45),
-                      width: 2.5,
-                    ),
-                  ),
-                  hintStyle: const TextStyle(
-                    color: Colors.white,
-                    fontFamily: 'georgia',
-                    fontWeight: FontWeight.normal,
-                  ),
-                ),
-                textStyle: const TextStyle(
-                  color: Colors.orange,
-                  fontFamily: 'georgia',
-                  fontWeight: FontWeight.normal,
-                  fontSize: 14,
-                ),
-              ),
-
-              const SizedBox(width: 15),
-
-              // Save button
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  foregroundColor: Colors.white,
-                  backgroundColor: Colors.transparent,
-                  side: const BorderSide(color: Colors.orange, width: 1),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                ),
-                onPressed: () {
-                  HapticFeedback.vibrate();
-                  _saveInformation(); // your custom save function
-                  setState(() {
-                    resetDropdown(); // This resets the dropdown
-                  });
-                },
-                child: const Text(
-                  'Save',
-                  style: TextStyle(
-                    fontFamily: 'georgia',
-                  ),
-                ),
-              ),
-            ],
-          ),
-        );
-      },
-    );
-  }
-
-  int getTotalSamples(List<List<int>> matrix) {
-    return matrix.fold(0, (sum, row) => sum + row.reduce((a, b) => a + b));
-  }
-
-  Widget buildConfusionMatrixTable() {
-    final int totalSamples = getTotalSamples(confusionMatrix);
-    return SingleChildScrollView(
-      scrollDirection: Axis.vertical,
-      child: Center(
-        child: ConstrainedBox(
-          constraints: const BoxConstraints(maxWidth: 600),
-          child: Column(
-            crossAxisAlignment:
-                CrossAxisAlignment.center, // Aligns text to the left
-            children: [
-              Padding(
-                padding:
-                    const EdgeInsets.only(bottom: 12.0, left: 12, right: 10),
-                child: Text(
-                  'This Tabel is showing the true labels (TL) and predicted labels (PL) for all samples recently assessed by the program (total samples: $totalSamples).',
-                  textAlign: TextAlign.justify,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontFamily: 'georgia',
-                    fontWeight: FontWeight.normal,
-                    color: Colors.white,
-                  ),
-                ),
-              ),
-              Table(
-                border: TableBorder.all(color: Colors.orangeAccent),
-                columnWidths: const {
-                  0: FixedColumnWidth(65),
-                },
-                defaultColumnWidth: const FixedColumnWidth(55),
-                children: [
-                  // Header row
-                  TableRow(
-                    children: [
-                      Container(
-                        color: const Color.fromARGB(150, 100, 129, 143),
-                        alignment: Alignment.center,
-                        padding: const EdgeInsets.symmetric(
-                            horizontal: 6.0, vertical: 8),
-                        child: const Text(
-                          'TL / PL',
-                          style: TextStyle(
-                            fontWeight: FontWeight.normal,
-                            fontFamily: 'georgia',
-                            color: Colors.white,
-                          ),
-                          textAlign: TextAlign.center,
-                        ),
-                      ),
-                      ...classLabels.map((label) => Container(
-                            color: const Color.fromARGB(150, 96, 125, 139),
-                            padding: const EdgeInsets.all(8.0),
-                            child: Center(
-                              child: Text(
-                                label,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.normal,
-                                  fontFamily: 'georgia',
-                                  color: Colors.white,
-                                ),
-                              ),
-                            ),
-                          )),
-                    ],
-                  ),
-                  // Data rows
-                  for (int i = 0; i < classLabels.length; i++)
-                    TableRow(
-                      children: [
-                        Container(
-                          color: const Color.fromARGB(150, 105, 105, 105),
-                          alignment: Alignment.center,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 6.0, vertical: 13),
-                          child: Text(
-                            classLabels[i],
-                            style: const TextStyle(
-                              fontWeight: FontWeight.normal,
-                              fontFamily: 'georgia',
-                              color: Colors.white,
-                            ),
-                            textAlign: TextAlign.center,
-                          ),
-                        ),
-                        for (int j = 0; j < classLabels.length; j++)
-                          Builder(builder: (_) {
-                            final rowTotal =
-                                confusionMatrix[i].reduce((a, b) => a + b);
-                            final value = confusionMatrix[i][j];
-                            final percentage =
-                                rowTotal > 0 ? value / rowTotal : 0.0;
-                            final percentText =
-                                (percentage * 100).toStringAsFixed(0);
-
-                            const baseColor = Color.fromARGB(200, 30, 140, 250);
-                            final backgroundColor = Color.lerp(
-                                const Color.fromARGB(150, 0, 0, 20),
-                                baseColor,
-                                percentage + 0.1);
-
-                            return AnimatedContainer(
-                              duration: const Duration(milliseconds: 500),
-                              padding: const EdgeInsets.all(6.0),
-                              color: backgroundColor,
-                              child: Center(
-                                child: Column(
-                                  mainAxisSize: MainAxisSize.min,
-                                  children: [
-                                    AnimatedSwitcher(
-                                      duration:
-                                          const Duration(milliseconds: 800),
-                                      transitionBuilder: (Widget child,
-                                          Animation<double> animation) {
-                                        return SlideTransition(
-                                          position: Tween<Offset>(
-                                            begin: const Offset(0.0, 1.0),
-                                            end: Offset.zero,
-                                          ).animate(animation),
-                                          child: child,
-                                        );
-                                      },
-                                      child: Text(
-                                        value.toString(),
-                                        key: ValueKey(
-                                            value), // Important for change detection
-                                        style: const TextStyle(
-                                          fontFamily: 'georgia',
-                                          fontWeight: FontWeight.normal,
-                                          color: Colors.white,
-                                        ),
-                                      ),
-                                    ),
-                                    AnimatedSwitcher(
-                                      duration:
-                                          const Duration(milliseconds: 1000),
-                                      transitionBuilder: (Widget child,
-                                          Animation<double> animation) {
-                                        return SlideTransition(
-                                          position: Tween<Offset>(
-                                            begin: const Offset(0.0, 1.0),
-                                            end: Offset.zero,
-                                          ).animate(animation),
-                                          child: child,
-                                        );
-                                      },
-                                      child: Text(
-                                        '($percentText%)',
-                                        key: ValueKey(
-                                            percentText), // Important for change detection
-                                        style: const TextStyle(
-                                          fontSize: 10,
-                                          fontFamily: 'georgia',
-                                          color: Colors.white70,
-                                        ),
-                                      ),
-                                    ),
-                                  ],
-                                ),
-                              ),
-                            );
-                          }),
-                      ],
-                    ),
-                ],
-              ),
-            ],
-          ),
-        ),
-      ),
-    );
-  }
-
-  String normalizeLabel(String rawLabel) {
-    rawLabel = rawLabel.toLowerCase();
-
-    if (rawLabel.contains('normal')) return 'NL';
-    if (rawLabel.contains('cataract')) return 'CA';
-    if (rawLabel.contains('glaucoma')) return 'GL';
-    if (rawLabel.contains('diabetic') || rawLabel.contains('dr')) return 'DR';
-    if (rawLabel.contains('unknown')) return 'UNK';
-
-    return rawLabel; // fallback to original if unmatched
-  }
-
-  Widget _confusionMatrixPage() {
-    return StreamBuilder<List<fundus_Model>>(
-      stream: _viewModel.allFundusList.stream,
-      builder: (context, snapshot) {
-        if (_viewModel.isLoading.value &&
-            snapshot.connectionState == ConnectionState.waiting) {
-          return const Center(child: CircularProgressIndicator());
-        }
-
-        if (snapshot.hasError) {
-          return Center(child: Text('Error: ${snapshot.error}'));
-        }
-
-        final List<fundus_Model>? fundusList = snapshot.data;
-
-        if (fundusList == null || fundusList.isEmpty) {
-          return const Center(
-              child: Text(
-            'No fundus data available!',
-            style: TextStyle(
-              fontFamily: 'georgia',
-            ),
-          ));
-        }
-
-        // Reset confusion matrix on each data update
-        confusionMatrix = List.generate(
-            classLabels.length, (_) => List.filled(classLabels.length, 0));
-
-        // Process fundus data to update the confusion matrix
-        for (var fu in fundusList) {
-          final actual = normalizeLabel(fu.orginal);
-          final predicted = normalizeLabel(fu.result);
-
-          if (labelIndex.containsKey(actual) &&
-              labelIndex.containsKey(predicted)) {
-            final i = labelIndex[actual]!;
-            final j = labelIndex[predicted]!;
-
-            confusionMatrix[i][j]++;
-          }
-        }
-
-        return Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: buildConfusionMatrixTable(),
-        );
-      },
     );
   }
 }

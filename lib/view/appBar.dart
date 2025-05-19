@@ -2,6 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:omvoting/View/home.dart';
 
+import 'package:omvoting/View/home2.dart';
+import 'package:omvoting/View/home3.dart';
+
 class AppBarClass extends StatelessWidget implements PreferredSizeWidget {
   final void Function()? onSave; // Make it nullable and optional
   final bool isSaveEnabled;
@@ -113,6 +116,8 @@ class AppBarClass extends StatelessWidget implements PreferredSizeWidget {
                   _popupItem("Save", context, isSaveEnabled),
                   _popupItem("Home", context, true),
                   _popupItem("Logout", context, true),
+                  _popupItem("Home2", context, true),
+                  _popupItem("Home3", context, true),
                 ];
               },
             ),
@@ -141,7 +146,18 @@ class AppBarClass extends StatelessWidget implements PreferredSizeWidget {
                   );
                 } else if (title == "Logout") {
                   HapticFeedback.vibrate();
-                  // Implement logout logic
+                } else if (title == "Home2") {
+                  HapticFeedback.vibrate();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomeClass2()),
+                  );
+                } else if (title == "Home3") {
+                  HapticFeedback.vibrate();
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(builder: (context) => const HomeClass3()),
+                  );
                 } else if (title == "Refresh") {
                   HapticFeedback.vibrate();
                   Navigator.pushReplacement(

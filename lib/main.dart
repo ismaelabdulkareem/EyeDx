@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:omvoting/View/home.dart';
 import 'firebase_options.dart';
-import 'package:omvoting/view/home.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -14,7 +14,7 @@ Future<void> main() async {
       const MaterialApp(
         home: HomeClass(),
         debugShowCheckedModeBanner: false,
-        title: "Fundus Classify",
+        title: "EyeDx",
       ),
     );
   } catch (e, stackTrace) {
