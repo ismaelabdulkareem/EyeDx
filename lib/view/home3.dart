@@ -43,7 +43,7 @@ class _HomeClassState3 extends State<HomeClass3> {
   Future<img.Image?> cropAndPreprocessServer(File file,
       {int targetSize = 224}) async {
     final uri = Uri.parse(
-        'http://192.168.43.126:5000/crop'); // Update with your server IP
+        'http://192.168.43.126:47356/crop'); // Update with your server IP
     final request = http.MultipartRequest('POST', uri)
       ..files.add(await http.MultipartFile.fromPath('image', file.path));
 

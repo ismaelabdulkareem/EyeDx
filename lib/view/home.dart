@@ -34,11 +34,12 @@ class _HomeClassState extends State<HomeClass> {
   String msgResult = '';
   final fundusVM = Get.put(fundusViewModel());
   String? selectedCase;
+  bool isProcessing = false; // ✅ For showing progress indicator
 
   Future<img.Image?> cropAndPreprocessServer(File file,
       {int targetSize = 224}) async {
     final uri = Uri.parse(
-        'http://192.168.43.126:5000/crop'); // Update with your server IP
+        'http://192.168.43.126:47356/crop'); // Update with your server IP
     final request = http.MultipartRequest('POST', uri)
       ..files.add(await http.MultipartFile.fromPath('image', file.path));
 
@@ -62,8 +63,13 @@ class _HomeClassState extends State<HomeClass> {
 
   Future<void> scrollToBottom() async {
     await Future.delayed(const Duration(milliseconds: 300));
+    var currentOffset = _scrollController.offset;
+    final maxExtent = _scrollController.position.maxScrollExtent;
+    currentOffset = 0;
+    final newOffset = (currentOffset + 50).clamp(0.0, maxExtent);
+
     _scrollController.animateTo(
-      _scrollController.position.maxScrollExtent,
+      newOffset,
       duration: const Duration(milliseconds: 400),
       curve: Curves.easeOut,
     );
@@ -272,6 +278,7 @@ class _HomeClassState extends State<HomeClass> {
       });
       return;
     }
+    setState(() => isProcessing = true); // ✅ Start progress indicator
 
     try {
       final file = File(imgFile!.path);
@@ -281,7 +288,7 @@ class _HomeClassState extends State<HomeClass> {
         setState(() {
           predictionResult = '';
           msgResult = '❌ Failed to preprocess image!';
-          // isLoading = false;
+          isProcessing = false;
         });
         return;
       }
@@ -307,6 +314,8 @@ class _HomeClassState extends State<HomeClass> {
         predictionResult = '';
         msgResult = "Image preprocessing failed!";
       });
+    } finally {
+      setState(() => isProcessing = false); // ✅ Stop progress indicator
     }
   }
 
@@ -370,6 +379,13 @@ class _HomeClassState extends State<HomeClass> {
               ],
             ),
           ),
+          if (isProcessing)
+            Container(
+              color: Colors.black45,
+              child: const Center(
+                child: CircularProgressIndicator(color: Colors.orange),
+              ),
+            ),
         ],
       ),
     );
@@ -481,15 +497,17 @@ class _HomeClassState extends State<HomeClass> {
           borderRadius: BorderRadius.circular(25),
         ),
       ),
-      onPressed: () {
-        preprocessImage();
-        HapticFeedback.vibrate();
-      },
+      onPressed: isProcessing
+          ? null
+          : () async {
+              setState(() => isProcessing = true);
+              HapticFeedback.vibrate();
+              await preprocessImage(); // Make sure this is `Future`
+              setState(() => isProcessing = false);
+            },
       child: const Text(
         'Preprocess Image',
-        style: TextStyle(
-          fontFamily: 'georgia',
-        ),
+        style: TextStyle(fontFamily: 'georgia'),
       ),
     );
   }
@@ -505,41 +523,50 @@ class _HomeClassState extends State<HomeClass> {
           borderRadius: BorderRadius.circular(25),
         ),
       ),
+      onPressed: isProcessing
+          ? null
+          : () async {
+              HapticFeedback.vibrate();
+              setState(() => isProcessing = true);
+              try {
+                File? imageToUse = processedImgFile ?? imgFile;
+                if (imageToUse == null) {
+                  setState(() {
+                    predictionResult = '';
+                    msgResult = "No image selected or processed!";
+                  });
+                  return;
+                }
+
+                // Let the UI render the spinner before heavy work
+                await Future.delayed(const Duration(milliseconds: 1000));
+
+                Uint8List imageBytes = await imageToUse.readAsBytes();
+                img.Image? image = img.decodeImage(imageBytes);
+                if (image == null) {
+                  _showSnackbar("Failed to decode image.");
+                  return;
+                }
+
+                img.Image resizedImage =
+                    img.copyResize(image, width: 224, height: 224);
+                List<List<List<int>>> imgArray = imageToArray(resizedImage);
+                List<List<List<double>>> normalizedImgArray =
+                    normalizeImageArray(imgArray);
+                List<List<List<List<double>>>> inputTensor =
+                    addBatchDimension(normalizedImgArray);
+
+                runInference(inputTensor);
+              } finally {
+                setState(() => isProcessing = false);
+              }
+            },
       child: const Text(
         'Predict',
         style: TextStyle(
           fontFamily: 'georgia',
         ),
       ),
-      onPressed: () async {
-        HapticFeedback.vibrate();
-        File? imageToUse = processedImgFile ?? imgFile;
-
-        if (imageToUse == null) {
-          setState(() {
-            predictionResult = '';
-            msgResult = "No image selected or processed!";
-          });
-          return;
-        }
-
-        Uint8List imageBytes = await imageToUse.readAsBytes();
-        img.Image? image = img.decodeImage(imageBytes);
-        if (image == null) {
-          _showSnackbar("Failed to decode image.");
-          return;
-        }
-
-        // Resize, normalize, add batch dimension
-        img.Image resizedImage = img.copyResize(image, width: 224, height: 224);
-        List<List<List<int>>> imgArray = imageToArray(resizedImage);
-        List<List<List<double>>> normalizedImgArray =
-            normalizeImageArray(imgArray);
-        List<List<List<List<double>>>> inputTensor =
-            addBatchDimension(normalizedImgArray);
-
-        runInference(inputTensor);
-      },
     );
   }
 
@@ -578,7 +605,7 @@ class _HomeClassState extends State<HomeClass> {
 
   Widget _banner() {
     return Container(
-      padding: const EdgeInsets.only(left: 15, right: 40, top: 10, bottom: 10),
+      padding: const EdgeInsets.only(left: 15, right: 20, top: 10, bottom: 10),
       margin: const EdgeInsets.symmetric(horizontal: 15),
       decoration: const BoxDecoration(
         gradient: LinearGradient(
@@ -612,10 +639,10 @@ class _HomeClassState extends State<HomeClass> {
           const SizedBox(width: 12),
           const Expanded(
             child: Text(
-              "This application performs multiclass classification of four types of eye diseases: Diabetic retinopathy (DR), Cataract, Glaucoma, and normal fundus.",
+              "The app functions as an automated system that detects and classifies three types of eye diseases: diabetic retinopathy, cataracts, and glaucoma, along with normal conditions, using advanced CNN models.",
               textAlign: TextAlign.justify,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 fontFamily: 'georgia',
                 color: Color.fromARGB(255, 0, 0, 0),
                 fontWeight: FontWeight.normal,
